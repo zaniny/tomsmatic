@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "schematic_stock",
-  "version": "0.3.11",
+  "version": "0.3.12",
   "name": "Tomsmatic",
   "description": "Compare Litematica materials with Tom's Simple Storage. See what's placed, stocked, or missing, and optionally refill Easy Place.",
   "icon": "assets/schematic_stock/icon.png",
