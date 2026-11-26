@@ -62,18 +62,18 @@ public final class SchematicStock implements ClientModInitializer {
         if (source == null) {
             return message("select_list");
         }
-        if (source instanceof PlacementMaterialLoad load && load.prepareMaterials()) {
-            return message("materials_loading");
-        }
-        if (source.getMaterialsAll().isEmpty()) {
-            return message("empty_list");
-        }
         var menu = (StorageTerminalMenu) terminal.getMenu();
         if (!menu.getCarried().isEmpty()) {
             return message("carried");
         }
         if (!stockReady(menu)) {
             return message(menu.slotCount <= 0 ? "waiting_network" : "waiting");
+        }
+        if (source instanceof PlacementMaterialLoad load) {
+            load.refreshMaterials();
+            var report = new StockScreen(source.getName(), List.of(), terminal, true);
+            openReport(client, source, report, load.materialsLoading());
+            return null;
         }
 
         List<StockRow> rows = compareMaterials(source, menu.sync::getAmount);
@@ -90,22 +90,39 @@ public final class SchematicStock implements ClientModInitializer {
         if (!FabricLoader.getInstance().isModLoaded("litematica")) return message("select_list");
         MaterialListBase source = SELECTION.forComparison(client);
         if (source == null) return message("select_list");
-        boolean waiting = source instanceof PlacementMaterialLoad load
-            ? load.prepareMaterials() : source.getMaterialsAll().isEmpty();
+        boolean waiting = source.getMaterialsAll().isEmpty();
+        if (source instanceof PlacementMaterialLoad load) {
+            load.refreshMaterials();
+            waiting = load.materialsLoading();
+        }
         var report = new StockScreen(source.getName(), List.of(), null, false);
+        openReport(client, source, report, waiting);
+        return null;
+    }
+
+    private static void openReport(Minecraft client, MaterialListBase source, StockScreen report, boolean waiting) {
         report.setMaterialsLoading(waiting);
         client.gui.setScreen(report);
         if (waiting) {
             pending = new PendingOpen(client.level, source, report, true);
         } else {
-            showStandalone(client, source, report);
+            loadStock(client, source, report);
         }
-        return null;
     }
 
-    private static void showStandalone(Minecraft client, MaterialListBase source, StockScreen report) {
+    private static void loadStock(Minecraft client, MaterialListBase source, StockScreen report) {
         pending = null;
         report.setMaterialsLoading(false);
+        var active = report.activeTerminal();
+        if (active != null && active.getMenu() instanceof StorageTerminalMenu menu) {
+            boolean ready = stockReady(menu);
+            var request = new PendingOpen(client.level, source, report, false);
+            report.updateRows(compareMaterials(source, item -> ready ? menu.sync.getAmount(item) : -1));
+            if (ready) request.lastItems = menu.itemList;
+            report.setStockLoading(!ready);
+            pending = request;
+            return;
+        }
         var rows = compareMaterials(source, item -> -1);
         report.updateRows(rows);
         if (rows.isEmpty()) return;
@@ -140,7 +157,7 @@ public final class SchematicStock implements ClientModInitializer {
         if (request.waitingForMaterials) {
             boolean waiting = request.source instanceof PlacementMaterialLoad load ? load.materialsLoading()
                 : request.source.getMaterialsAll().isEmpty() && ++request.age < UNTRACKED_MATERIAL_WAIT_TICKS;
-            if (!waiting) showStandalone(client, request.source, request.report);
+            if (!waiting) loadStock(client, request.source, request.report);
             return;
         }
         if (request.age < STOCK_WAIT_TICKS) request.age++;
@@ -168,20 +185,33 @@ public final class SchematicStock implements ClientModInitializer {
 
     static List<StockRow> compareMaterials(MaterialListBase source,
                                            ToLongFunction<TerminalItemStack> stock) {
-        var required = new LinkedHashMap<TerminalItemStack, Long>();
+        boolean tracksPlacement = source instanceof PlacementMaterialLoad;
+        int multiplier = source.getMultiplier();
+        var required = new LinkedHashMap<TerminalItemStack, MaterialCounts>();
         for (var material : source.getMaterialsAll()) {
-            long count = (long) material.getCountTotal() * source.getMultiplier();
+            long total = material.getCountTotal();
+            long count = total * multiplier;
             if (count > 0 && !material.getStack().isEmpty()) {
-                required.merge(new TerminalItemStack(material.getStack().copyWithCount(1)), count, Long::sum);
+                long placed = tracksPlacement ? Math.clamp(total - material.getCountMissing(), 0, total) : 0;
+                required.merge(new TerminalItemStack(material.getStack().copyWithCount(1)),
+                    new MaterialCounts(count, placed), MaterialCounts::add);
             }
         }
         return required.entrySet().stream()
             .map(entry -> {
                 var key = entry.getKey();
-                return new StockRow(key.getStack(), entry.getValue(), stock.applyAsLong(key));
+                var counts = entry.getValue();
+                return new StockRow(key.getStack(), counts.required(), tracksPlacement ? counts.placed() : -1,
+                    stock.applyAsLong(key));
             })
             .sorted(Comparator.comparingLong(StockRow::shortfall).reversed().thenComparing(StockRow::name))
             .toList();
+    }
+
+    private record MaterialCounts(long required, long placed) {
+        MaterialCounts add(MaterialCounts other) {
+            return new MaterialCounts(required + other.required, placed + other.placed);
+        }
     }
 
     private static Component message(String key) {

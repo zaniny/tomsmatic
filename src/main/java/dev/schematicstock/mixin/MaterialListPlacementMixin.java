@@ -17,15 +17,9 @@ import org.spongepowered.asm.mixin.injection.At;
 @Mixin(targets = "fi.dy.masa.litematica.materials.MaterialListPlacement")
 abstract class MaterialListPlacementMixin implements PlacementMaterialLoad {
     @Unique private ITask tomsmatic$materialTask;
-    @Unique private boolean tomsmatic$materialsCalculated;
-
     @Override
-    public boolean prepareMaterials() {
-        var list = (MaterialListPlacement) (Object) this;
-        if (!materialsLoading() && !tomsmatic$materialsCalculated && list.getMaterialsAll().isEmpty()) {
-            list.reCreateMaterialList();
-        }
-        return materialsLoading();
+    public void refreshMaterials() {
+        if (!materialsLoading()) ((MaterialListPlacement) (Object) this).reCreateMaterialList();
     }
 
     @Override
@@ -40,15 +34,12 @@ abstract class MaterialListPlacementMixin implements PlacementMaterialLoad {
         ((TaskCountBlocksPlacement) task).setCompletionListener(new ICompletionListener() {
             @Override
             public void onTaskCompleted() {
-                if (tomsmatic$materialTask == task) {
-                    tomsmatic$materialTask = null;
-                    tomsmatic$materialsCalculated = true;
-                }
+                if (tomsmatic$materialTask == task) tomsmatic$materialTask = null;
             }
 
             @Override
             public void onTaskAborted() {
-                if (tomsmatic$materialTask == task) tomsmatic$materialTask = null;
+                onTaskCompleted();
             }
         });
         original.call(scheduler, task, interval);

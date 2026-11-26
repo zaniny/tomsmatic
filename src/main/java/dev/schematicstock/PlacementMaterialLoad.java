@@ -1,7 +1,7 @@
 package dev.schematicstock;
 
 public interface PlacementMaterialLoad {
-    boolean prepareMaterials();
+    void refreshMaterials();
 
     boolean materialsLoading();
 }

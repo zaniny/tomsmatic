@@ -86,9 +86,9 @@ try {
     if ($LASTEXITCODE -ne 0) { throw "javac exited with code $LASTEXITCODE" }
 
     Copy-Item -Path (Join-Path $PSScriptRoot 'src/main/resources/*') -Destination $classes -Recurse
-    $archive = Join-Path $staging 'tomsmatic-0.3.5.jar'
+    $archive = Join-Path $staging 'tomsmatic-0.3.6.jar'
     [IO.Compression.ZipFile]::CreateFromDirectory($classes, $archive)
-    $result = Join-Path $outputDir 'tomsmatic-0.3.5.jar'
+    $result = Join-Path $outputDir 'tomsmatic-0.3.6.jar'
     [IO.File]::Move($archive, $result, $true)
     Write-Output $result
 } finally {

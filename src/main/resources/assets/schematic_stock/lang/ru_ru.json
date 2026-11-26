@@ -15,6 +15,7 @@
   "schematic_stock.tooltip.required_stacks": "Нужно: %s стак. по %s",
   "schematic_stock.tooltip.required_stacks_and_items": "Нужно: %s стак. по %s + %s шт.",
   "schematic_stock.available": "На складе",
+  "schematic_stock.placed": "Поставлено",
   "schematic_stock.shortfall": "Не хватает",
   "schematic_stock.close": "Закрыть",
   "schematic_stock.settings": "Настройки Tomsmatic",

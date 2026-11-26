@@ -15,6 +15,7 @@
   "schematic_stock.tooltip.required_stacks": "Required: %s stack(s) of %s",
   "schematic_stock.tooltip.required_stacks_and_items": "Required: %s stack(s) of %s + %s item(s)",
   "schematic_stock.available": "In stock",
+  "schematic_stock.placed": "Placed",
   "schematic_stock.shortfall": "Shortfall",
   "schematic_stock.close": "Close",
   "schematic_stock.settings": "Tomsmatic settings",

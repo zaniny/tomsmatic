@@ -42,7 +42,9 @@ final class StockScreen extends Screen implements IDataReceiver {
     private int left;
     private int right;
     private int requiredX;
+    private int placedX;
     private int availableX;
+    private int columnWidth;
     private int nameWidth;
     private int craftX;
 
@@ -100,10 +102,11 @@ final class StockScreen extends Screen implements IDataReceiver {
         stockList.scrollTarget = stockList.scrollAmount();
         right = stockList.getRight() - (stockList.maxScrollAmount() > 0 ? stockList.scrollbarWidth() + 3 : 0);
         craftX = recipes == null ? right : right - 34;
-        int span = craftX - left;
-        requiredX = left + span * 55 / 100;
-        availableX = left + span * 73 / 100;
-        nameWidth = requiredX - left - 26 - span * 17 / 100;
+        columnWidth = (craftX - left) * 7 / 40;
+        availableX = craftX - 2 - columnWidth;
+        placedX = availableX - columnWidth;
+        requiredX = placedX - columnWidth;
+        nameWidth = Math.max(0, requiredX - columnWidth - left - 22);
         addRenderableWidget(Button.builder(label("close"), button -> onClose())
             .bounds(width - 65, 5, 60, 20).build());
         Button refill = addRenderableWidget(Button.builder(refillLabel(), button -> {
@@ -123,7 +126,7 @@ final class StockScreen extends Screen implements IDataReceiver {
         super.extractRenderState(graphics, mouseX, mouseY, delta);
         graphics.centeredText(font, title, width / 2, 10, 0xffffffff);
         graphics.centeredText(font, fit(source, right - left), width / 2, 22, 0xffb4c4d8);
-        boolean unknown = rows.isEmpty() || rows.getFirst().available() < 0;
+        boolean unknown = rows.isEmpty() || rows.getLast().shortfall() < 0;
         Component status = craftStatus != null ? craftStatus
             : rows.isEmpty() ? label(materialsLoading ? "materials_loading" : "empty_list")
             : unknown ? label(stockLoading ? "stock_loading" : "stock_unknown")
@@ -132,6 +135,7 @@ final class StockScreen extends Screen implements IDataReceiver {
             craftStatus == null && !unknown && missingTypes == 0 ? 0xff80d99d : 0xffffbc85);
         graphics.text(font, label("item"), left + 2, 50, 0xffb4c4d8);
         alignRight(graphics, label("required").getString(), requiredX, 50, 0xffb4c4d8);
+        alignRight(graphics, label("placed").getString(), placedX, 50, 0xffb4c4d8);
         alignRight(graphics, label("available").getString(), availableX, 50, 0xffb4c4d8);
         alignRight(graphics, label("shortfall").getString(), craftX - 2, 50, 0xffb4c4d8);
         if (recipes != null) graphics.centeredText(font, label("craft"), craftX + 17, 50, 0xffb4c4d8);
@@ -209,7 +213,8 @@ final class StockScreen extends Screen implements IDataReceiver {
     }
 
     private void alignRight(GuiGraphicsExtractor graphics, String text, int x, int y, int color) {
-        graphics.text(font, text, x - font.width(text), y, color);
+        var clipped = fit(text, Math.max(0, columnWidth - 4));
+        graphics.text(font, clipped, x - font.width(clipped), y, color);
     }
 
     private static Component label(String key, Object... args) {
@@ -290,6 +295,7 @@ final class StockScreen extends Screen implements IDataReceiver {
                 graphics.item(row.item(), left + 2, y + 1);
                 graphics.text(font, fit(row.name(), nameWidth), left + 22, y + 6, 0xfff2f5fa);
                 alignRight(graphics, Long.toString(row.required()), requiredX, y + 6, 0xfff2f5fa);
+                alignRight(graphics, quantity(row.placed()), placedX, y + 6, 0xfff2f5fa);
                 alignRight(graphics, quantity(row.available()), availableX, y + 6, 0xfff2f5fa);
                 long shortfall = row.shortfall();
                 alignRight(graphics, quantity(shortfall), craftX - 2, y + 6,

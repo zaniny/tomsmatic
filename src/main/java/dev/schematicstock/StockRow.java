@@ -3,13 +3,15 @@ package dev.schematicstock;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 
-record StockRow(ItemStack item, long required, long available) {
+record StockRow(ItemStack item, long required, long placed, long available) {
     String name() {
         return item.getHoverName().getString();
     }
 
     long shortfall() {
-        return available < 0 ? -1 : Math.max(0, required - available);
+        long remaining = required - Math.max(0, placed);
+        if (remaining == 0) return 0;
+        return available < 0 ? -1 : Math.max(0, remaining - available);
     }
 
     Component requiredStackTooltip() {
