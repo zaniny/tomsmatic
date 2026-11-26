@@ -124,21 +124,21 @@ final class StockScreen extends Screen implements IDataReceiver {
     @Override
     public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
         super.extractRenderState(graphics, mouseX, mouseY, delta);
-        graphics.centeredText(font, title, width / 2, 10, 0xffffffff);
-        graphics.centeredText(font, fit(source, right - left), width / 2, 22, 0xffb4c4d8);
+        graphics.centeredText(font, title, width / 2, 10, UiColors.TITLE_TEXT);
+        graphics.centeredText(font, fit(source, right - left), width / 2, 22, UiColors.SECONDARY_TEXT);
         boolean unknown = rows.isEmpty() || rows.getLast().shortfall() < 0;
         Component status = craftStatus != null ? craftStatus
             : rows.isEmpty() ? label(materialsLoading ? "materials_loading" : "empty_list")
             : unknown ? label(stockLoading ? "stock_loading" : "stock_unknown")
             : missingTypes == 0 ? label("enough") : label("missing_types", missingTypes, rows.size());
         graphics.centeredText(font, fit(status.getString(), width - 16), width / 2, 34,
-            craftStatus == null && !unknown && missingTypes == 0 ? 0xff80d99d : 0xffffbc85);
-        graphics.text(font, label("item"), left + 2, 50, 0xffb4c4d8);
-        alignRight(graphics, label("required").getString(), requiredX, 50, 0xffb4c4d8);
-        alignRight(graphics, label("placed").getString(), placedX, 50, 0xffb4c4d8);
-        alignRight(graphics, label("available").getString(), availableX, 50, 0xffb4c4d8);
-        alignRight(graphics, label("shortfall").getString(), craftX - 2, 50, 0xffb4c4d8);
-        if (recipes != null) graphics.centeredText(font, label("craft"), craftX + 17, 50, 0xffb4c4d8);
+            craftStatus == null && !unknown && missingTypes == 0 ? UiColors.POSITIVE_TEXT : UiColors.STATUS_WARNING_TEXT);
+        graphics.text(font, label("item"), left + 2, 50, UiColors.SECONDARY_TEXT);
+        alignRight(graphics, label("required").getString(), requiredX, 50, UiColors.SECONDARY_TEXT);
+        alignRight(graphics, label("placed").getString(), placedX, 50, UiColors.SECONDARY_TEXT);
+        alignRight(graphics, label("available").getString(), availableX, 50, UiColors.SECONDARY_TEXT);
+        alignRight(graphics, label("shortfall").getString(), craftX - 2, 50, UiColors.SECONDARY_TEXT);
+        if (recipes != null) graphics.centeredText(font, label("craft"), craftX + 17, 50, UiColors.SECONDARY_TEXT);
     }
 
     @Override
@@ -291,18 +291,18 @@ final class StockScreen extends Screen implements IDataReceiver {
             for (int i = start; i < end; i++) {
                 StockRow row = rows.get(i);
                 int y = getY() + i * ROW_HEIGHT - offset;
-                graphics.fill(left, y, right, y + ROW_HEIGHT - 1, i % 2 == 0 ? 0xb827303c : 0xb81d252f);
+                graphics.fill(left, y, right, y + ROW_HEIGHT - 1, i % 2 == 0 ? UiColors.EVEN_ROW_BACKGROUND : UiColors.ODD_ROW_BACKGROUND);
                 graphics.item(row.item(), left + 2, y + 1);
-                graphics.text(font, fit(row.name(), nameWidth), left + 22, y + 6, 0xfff2f5fa);
-                alignRight(graphics, Long.toString(row.required()), requiredX, y + 6, 0xfff2f5fa);
-                alignRight(graphics, quantity(row.placed()), placedX, y + 6, 0xfff2f5fa);
-                alignRight(graphics, quantity(row.available()), availableX, y + 6, 0xfff2f5fa);
+                graphics.text(font, fit(row.name(), nameWidth), left + 22, y + 6, UiColors.ROW_TEXT);
+                alignRight(graphics, Long.toString(row.required()), requiredX, y + 6, UiColors.ROW_TEXT);
+                alignRight(graphics, quantity(row.placed()), placedX, y + 6, UiColors.ROW_TEXT);
+                alignRight(graphics, quantity(row.available()), availableX, y + 6, UiColors.ROW_TEXT);
                 long shortfall = row.shortfall();
                 alignRight(graphics, quantity(shortfall), craftX - 2, y + 6,
-                    shortfall > 0 ? 0xffffb184 : 0xff80d99d);
+                    shortfall > 0 ? UiColors.SHORTFALL_TEXT : UiColors.POSITIVE_TEXT);
                 if (recipes != null && recipes.hasRecipe(row.item())) {
                     if (pointerInList && mouseX >= craftX && mouseX < right && mouseY >= y && mouseY < y + ROW_HEIGHT) {
-                        graphics.fill(craftX, y, right, y + ROW_HEIGHT - 1, 0x55ffffff);
+                        graphics.fill(craftX, y, right, y + ROW_HEIGHT - 1, UiColors.CRAFT_HOVER_BACKGROUND);
                     }
                     graphics.item(craftIcon, craftX + 9, y + 1);
                 }

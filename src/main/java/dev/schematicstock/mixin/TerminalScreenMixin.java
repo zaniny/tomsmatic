@@ -4,6 +4,7 @@ import com.tom.storagemod.screen.AbstractStorageTerminalScreen;
 import com.tom.storagemod.screen.TSContainerScreen;
 import dev.schematicstock.CompareButton;
 import dev.schematicstock.SchematicStock;
+import dev.schematicstock.UiColors;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
@@ -53,9 +54,9 @@ abstract class TerminalScreenMixin extends TSContainerScreen<AbstractContainerMe
         int x = (width - panelWidth) / 2;
         int panelHeight = lines.size() * 11 + 10;
         int y = height - panelHeight - 5;
-        graphics.fill(x, y, x + panelWidth, y + panelHeight, 0xf020252e);
+        graphics.fill(x, y, x + panelWidth, y + panelHeight, UiColors.NOTICE_BACKGROUND);
         for (var line : lines) {
-            graphics.centeredText(font, line, width / 2, y + 5, 0xffffd796);
+            graphics.centeredText(font, line, width / 2, y + 5, UiColors.NOTICE_TEXT);
             y += 11;
         }
     }

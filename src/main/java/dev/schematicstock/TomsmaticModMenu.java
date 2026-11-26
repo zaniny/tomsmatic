@@ -90,11 +90,11 @@ public final class TomsmaticModMenu implements ModMenuApi {
         @Override
         public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
             super.extractRenderState(graphics, mouseX, mouseY, delta);
-            graphics.centeredText(font, title, width / 2, Math.max(5, height / 2 - 66), 0xffffffff);
+            graphics.centeredText(font, title, width / 2, Math.max(5, height / 2 - 66), UiColors.TITLE_TEXT);
             if (status != null) {
                 int y = height / 2 + 50;
                 for (var line : font.split(status, width - 16)) {
-                    graphics.centeredText(font, line, width / 2, y, 0xffffd796);
+                    graphics.centeredText(font, line, width / 2, y, UiColors.NOTICE_TEXT);
                     y += 11;
                 }
             }
