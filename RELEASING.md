@@ -16,7 +16,7 @@ git merge --ff-only FETCH_HEAD
 Если ветки разошлись, `--ff-only` остановит слияние. Сохрани свои правки и проверь историю перед объединением. Если папка пуста или ещё не существует, вместо команд выше выполни:
 
 ```powershell
-git clone --origin bundle "$env:USERPROFILE\Downloads\Tomsmatic.bundle" 'C:\Code\Mods\Tomsmatic'
+git clone --branch main --origin bundle "$env:USERPROFILE\Downloads\Tomsmatic.bundle" 'C:\Code\Mods\Tomsmatic'
 Set-Location 'C:\Code\Mods\Tomsmatic'
 ```
 
