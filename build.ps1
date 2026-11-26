@@ -10,6 +10,8 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+$modMetadata = Get-Content -Raw -LiteralPath (Join-Path $PSScriptRoot 'src/main/resources/fabric.mod.json') | ConvertFrom-Json
+$jarName = "tomsmatic-$($modMetadata.version).jar"
 $javac = if ($Jdk) {
     Join-Path $Jdk 'bin/javac.exe'
 } else {
@@ -86,9 +88,9 @@ try {
     if ($LASTEXITCODE -ne 0) { throw "javac exited with code $LASTEXITCODE" }
 
     Copy-Item -Path (Join-Path $PSScriptRoot 'src/main/resources/*') -Destination $classes -Recurse
-    $archive = Join-Path $staging 'tomsmatic-0.3.7.jar'
+    $archive = Join-Path $staging $jarName
     [IO.Compression.ZipFile]::CreateFromDirectory($classes, $archive)
-    $result = Join-Path $outputDir 'tomsmatic-0.3.7.jar'
+    $result = Join-Path $outputDir $jarName
     [IO.File]::Move($archive, $result, $true)
     Write-Output $result
 } finally {

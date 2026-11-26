@@ -45,6 +45,8 @@ Tomsmatic использует последний открытый список 
 
 ## Сборка из исходников
 
+Для сборки без установленного игрового профиля выполни `python scripts/build.py` с Python 3.11+ и JDK 25. JAR и контрольная сумма появятся в `build/release`. Порядок настройки GitHub Actions и публикации описан в [RELEASING.md](RELEASING.md).
+
 Скрипт использует локальные файлы профиля Modrinth и JDK 25. В PowerShell 7 выполни из папки проекта:
 
 ```powershell
