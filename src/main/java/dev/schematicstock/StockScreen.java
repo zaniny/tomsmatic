@@ -29,12 +29,13 @@ final class StockScreen extends Screen implements IDataReceiver {
     private static final int LIST_TOP = 62;
     private static final long SCROLL_DURATION_NANOS = 120_000_000;
     private final String source;
-    private final List<StockRow> rows;
-    private final long missingTypes;
+    private List<StockRow> rows;
+    private long missingTypes;
     private AbstractStorageTerminalScreen<?> terminal;
     private final boolean returnToTerminal;
-    private final CraftingRecipes recipes;
-    private final ItemStack craftIcon;
+    private CraftingRecipes recipes;
+    private ItemStack craftIcon = ItemStack.EMPTY;
+    private boolean stockLoading;
     private Component craftStatus;
     private StockList stockList;
     private int left;
@@ -47,19 +48,35 @@ final class StockScreen extends Screen implements IDataReceiver {
     StockScreen(String source, List<StockRow> rows, AbstractStorageTerminalScreen<?> terminal, boolean returnToTerminal) {
         super(label("title"));
         this.source = source;
-        this.rows = List.copyOf(rows);
-        missingTypes = rows.stream().filter(row -> row.shortfall() > 0).count();
+        updateRows(rows);
         this.terminal = terminal;
         this.returnToTerminal = returnToTerminal;
-        recipes = terminal != null && terminal.getMenu() instanceof CraftingTerminalMenu
-            ? new CraftingRecipes(minecraft.player.getRecipeBook(), SlotDisplayContext.fromLevel(minecraft.level)) : null;
-        craftIcon = recipes == null ? ItemStack.EMPTY : new ItemStack(Items.CRAFTING_TABLE);
+        enableCrafting(terminal);
     }
 
     boolean attachTerminal(AbstractStorageTerminalScreen<?> terminal) {
         if (this.terminal != null) return false;
         this.terminal = terminal;
+        enableCrafting(terminal);
         return true;
+    }
+
+    private void enableCrafting(AbstractStorageTerminalScreen<?> terminal) {
+        if (terminal != null && terminal.getMenu() instanceof CraftingTerminalMenu) {
+            recipes = new CraftingRecipes(minecraft.player.getRecipeBook(), SlotDisplayContext.fromLevel(minecraft.level));
+            craftIcon = new ItemStack(Items.CRAFTING_TABLE);
+        }
+    }
+
+    void updateRows(List<StockRow> rows) {
+        int previousSize = this.rows == null ? 0 : this.rows.size();
+        this.rows = List.copyOf(rows);
+        missingTypes = this.rows.stream().filter(row -> row.shortfall() > 0).count();
+        if (stockList != null && previousSize != rows.size()) rebuildWidgets();
+    }
+
+    void setStockLoading(boolean stockLoading) {
+        this.stockLoading = stockLoading;
     }
 
     @Override
@@ -102,7 +119,8 @@ final class StockScreen extends Screen implements IDataReceiver {
         graphics.centeredText(font, title, width / 2, 10, 0xffffffff);
         graphics.centeredText(font, fit(source, right - left), width / 2, 22, 0xffb4c4d8);
         boolean unknown = rows.isEmpty() || rows.getFirst().available() < 0;
-        Component status = craftStatus != null ? craftStatus : rows.isEmpty() ? label("empty_list") : unknown ? label("stock_unknown")
+        Component status = craftStatus != null ? craftStatus : rows.isEmpty() ? label("empty_list")
+            : unknown ? label(stockLoading ? "stock_loading" : "stock_unknown")
             : missingTypes == 0 ? label("enough") : label("missing_types", missingTypes, rows.size());
         graphics.centeredText(font, fit(status.getString(), width - 16), width / 2, 34,
             craftStatus == null && !unknown && missingTypes == 0 ? 0xff80d99d : 0xffffbc85);

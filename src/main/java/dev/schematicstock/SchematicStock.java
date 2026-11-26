@@ -1,13 +1,14 @@
 package dev.schematicstock;
 
 import com.tom.storagemod.inventory.TerminalItemStack;
+import com.tom.storagemod.item.WirelessTerminal;
 import com.tom.storagemod.menu.StorageTerminalMenu;
 import com.tom.storagemod.network.NetworkHandler;
 import com.tom.storagemod.network.OpenTerminalPacket;
 import com.tom.storagemod.screen.AbstractStorageTerminalScreen;
+import com.tom.storagemod.util.PlayerInvUtil;
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.schematicstock.refill.RefillClient;
-import dev.schematicstock.refill.RefillServer;
 import fi.dy.masa.litematica.data.DataManager;
 import fi.dy.masa.litematica.gui.GuiMaterialList;
 import fi.dy.masa.litematica.materials.MaterialListBase;
@@ -28,6 +29,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.network.chat.Component;
 
 public final class SchematicStock implements ClientModInitializer {
+    private static final int STOCK_WAIT_TICKS = 200;
     static final KeyMapping OPEN_MATERIALS_KEY = new KeyMapping("key.schematic_stock.materials",
         InputConstants.UNKNOWN.getValue(), KeyMapping.Category.MISC);
     private static final StockSelection SELECTION = new StockSelection();
@@ -102,8 +104,12 @@ public final class SchematicStock implements ClientModInitializer {
         pending = null;
         var report = new StockScreen(source.getName(), compareMaterials(source, item -> -1), null, false);
         client.gui.setScreen(report);
-        if (ClientPlayNetworking.canSend(OpenTerminalPacket.ID) && !RefillServer.findWireless(client.player).isEmpty()) {
+        boolean hasWirelessTerminal = PlayerInvUtil.findItem(client.player,
+            stack -> stack.getItem() instanceof WirelessTerminal terminal && terminal.canOpen(stack),
+            false, stack -> true);
+        if (hasWirelessTerminal && ClientPlayNetworking.canSend(OpenTerminalPacket.ID)) {
             pending = new PendingOpen(client.level, source, report, false);
+            report.setStockLoading(true);
             NetworkHandler.openTerminal();
         }
     }
@@ -131,15 +137,20 @@ public final class SchematicStock implements ClientModInitializer {
             else if (!request.source.getMaterialsAll().isEmpty()) showStandalone(client, request.source);
             return;
         }
-        boolean timedOut = ++request.age >= 60;
+        if (request.age < STOCK_WAIT_TICKS) request.age++;
+        boolean timedOut = request.age >= STOCK_WAIT_TICKS;
         var terminal = request.report.activeTerminal();
         if (terminal != null && terminal.getMenu() instanceof StorageTerminalMenu menu && menu.getCarried().isEmpty()) {
-            if (!timedOut && !stockReady(menu)) return;
-            pending = null;
-            boolean ready = stockReady(menu);
-            var rows = compareMaterials(request.source, item -> ready ? menu.sync.getAmount(item) : -1);
-            client.gui.setScreen(new StockScreen(request.source.getName(), rows, terminal, false));
+            // Tom's replaces itemList on every stock packet, including chunks of the initial list.
+            if (stockReady(menu) && request.lastItems != menu.itemList) {
+                request.lastItems = menu.itemList;
+                request.report.updateRows(compareMaterials(request.source, menu.sync::getAmount));
+                request.report.setStockLoading(false);
+            } else if (timedOut) {
+                request.report.setStockLoading(false);
+            }
         } else if (timedOut) {
+            request.report.setStockLoading(false);
             pending = null;
         }
     }
@@ -176,6 +187,7 @@ public final class SchematicStock implements ClientModInitializer {
         private final MaterialListBase source;
         private final StockScreen report;
         private final boolean waitingForMaterials;
+        private List<TerminalItemStack> lastItems;
         private int age;
 
         private PendingOpen(ClientLevel level, MaterialListBase source, StockScreen report, boolean waitingForMaterials) {

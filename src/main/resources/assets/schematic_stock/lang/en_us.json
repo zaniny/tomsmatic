@@ -25,6 +25,7 @@
   "key.schematic_stock.materials": "Tomsmatic: Open material list",
   "schematic_stock.materials_unavailable": "Tomsmatic: the material list is available while playing in a world.",
   "schematic_stock.stock_unknown": "Storage stock unavailable",
+  "schematic_stock.stock_loading": "Loading storage stock…",
   "schematic_stock.craft": "Craft",
   "schematic_stock.craft_fill": "Fill the terminal crafting grid",
   "schematic_stock.craft_terminal_unavailable": "Tomsmatic: the crafting terminal is no longer available.",

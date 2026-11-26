@@ -25,6 +25,7 @@
   "key.schematic_stock.materials": "Tomsmatic: открыть список материалов",
   "schematic_stock.materials_unavailable": "Tomsmatic: список материалов доступен в игровом мире.",
   "schematic_stock.stock_unknown": "Остатки хранилища недоступны",
+  "schematic_stock.stock_loading": "Загружаем остатки хранилища…",
   "schematic_stock.craft": "Крафт",
   "schematic_stock.craft_fill": "Заполнить сетку крафта терминала",
   "schematic_stock.craft_terminal_unavailable": "Tomsmatic: терминал крафта больше недоступен.",
