@@ -5,7 +5,7 @@ Tomsmatic compares your Litematica material list with the items in your Tom’s 
 ## Check a build
 
 1. Select a schematic placement in Litematica or open its material list.
-2. Click the checklist button below the beacon indicator in a Tom’s Simple Storage terminal. You can also assign a material-list hotkey in **Mod Menu → Tomsmatic → Settings**.
+2. Click the chest-and-checkmark button below the beacon indicator in a Tom’s Simple Storage terminal. You can also assign a material-list hotkey in **Mod Menu → Tomsmatic → Settings**.
 3. Hover over a row to see the total and shortfall in stacks and individual items. The biggest shortages appear first.
 
 The hotkey fetches stock in the background when you have a linked wireless terminal and can reach its network. If the terminal supports crafting, the crafting icon in a material row opens it and tries to fill its grid for a recipe you’ve unlocked.
