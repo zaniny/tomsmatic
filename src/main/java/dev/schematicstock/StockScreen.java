@@ -194,17 +194,19 @@ final class StockScreen extends Screen implements IDataReceiver {
     }
 
     private void showRowTooltip(GuiGraphicsExtractor graphics, StockRow row, int mouseX, int mouseY) {
-        Component required = row.requiredStackTooltip();
+        Component total = row.totalStackTooltip();
+        Component shortfall = row.shortfallStackTooltip();
         if (mouseX < left + 22 + nameWidth) {
             var item = row.item();
             var lines = new ArrayList<>(getTooltipFromItem(minecraft, item));
-            lines.add(required);
+            lines.add(total);
+            lines.add(shortfall);
             graphics.setTooltipForNextFrame(font, lines, item.getTooltipImage(), mouseX, mouseY,
                 item.get(DataComponents.TOOLTIP_STYLE), true);
         } else if (mouseX >= craftX && recipes != null && recipes.hasRecipe(row.item())) {
-            graphics.setComponentTooltipForNextFrame(font, List.of(required, label("craft_fill")), mouseX, mouseY);
+            graphics.setComponentTooltipForNextFrame(font, List.of(total, shortfall, label("craft_fill")), mouseX, mouseY);
         } else {
-            graphics.setTooltipForNextFrame(font, required, mouseX, mouseY);
+            graphics.setComponentTooltipForNextFrame(font, List.of(total, shortfall), mouseX, mouseY);
         }
     }
 
