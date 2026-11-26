@@ -4,19 +4,19 @@ Tomsmatic — мод для Fabric. Fabric загружает мод, а пуб�
 
 ## 1. Перенести коммиты в рабочую папку
 
-Сохрани `Tomsmatic-0.3.10.bundle` в папку загрузок. Если `C:\Code\Mods\Tomsmatic` уже содержит подготовленный ранее Git-репозиторий, открой PowerShell и выполни:
+Сохрани `Tomsmatic-0.3.11.bundle` в папку загрузок. Если `C:\Code\Mods\Tomsmatic` уже содержит подготовленный ранее Git-репозиторий, открой PowerShell и выполни:
 
 ```powershell
 Set-Location 'C:\Code\Mods\Tomsmatic'
 git status --short --branch
-git fetch "$env:USERPROFILE\Downloads\Tomsmatic-0.3.10.bundle" main
+git fetch "$env:USERPROFILE\Downloads\Tomsmatic-0.3.11.bundle" main
 git merge --ff-only FETCH_HEAD
 ```
 
 Если ветки разошлись, `--ff-only` остановит слияние. Сохрани свои правки и проверь историю перед объединением. Если папка пуста или ещё не существует, вместо команд выше выполни:
 
 ```powershell
-git clone --branch main --origin bundle "$env:USERPROFILE\Downloads\Tomsmatic-0.3.10.bundle" 'C:\Code\Mods\Tomsmatic'
+git clone --branch main --origin bundle "$env:USERPROFILE\Downloads\Tomsmatic-0.3.11.bundle" 'C:\Code\Mods\Tomsmatic'
 Set-Location 'C:\Code\Mods\Tomsmatic'
 ```
 
@@ -41,16 +41,16 @@ git push -u origin main
 
 ## 3. Собрать GitHub Release
 
-В примере выпускается текущая версия `0.3.10`. У следующих релизов обновляй версию в `src/main/resources/fabric.mod.json` перед созданием тега. Используй новый тег для каждого выпуска.
+В примере выпускается текущая версия `0.3.11`. У следующих релизов обновляй версию в `src/main/resources/fabric.mod.json` перед созданием тега. Используй новый тег для каждого выпуска.
 
 ```powershell
 git switch main
 git pull --ff-only
-git tag -a v0.3.10 -m "Tomsmatic 0.3.10"
-git push origin v0.3.10
+git tag -a v0.3.11 -m "Tomsmatic 0.3.11"
+git push origin v0.3.11
 ```
 
-После успешной сборки в **Releases** появится черновик с `tomsmatic-0.3.10.jar` и файлом SHA-256. Примечания берутся из раздела `## 0.3.10` в [CHANGELOG.md](CHANGELOG.md). Для нового тега добавь одноимённый раздел в журнал до отправки тега. Проверь JAR в отдельном профиле Fabric, затем нажми **Publish release**.
+После успешной сборки в **Releases** появится черновик с `tomsmatic-0.3.11.jar` и файлом SHA-256. Примечания берутся из раздела `## 0.3.11` в [CHANGELOG.md](CHANGELOG.md). Для нового тега добавь одноимённый раздел в журнал до отправки тега. Проверь JAR в отдельном профиле Fabric, затем нажми **Publish release**.
 
 Чтобы запустить ту же сборку локально, поставь Python 3.11 или новее и JDK 25, затем запусти `python scripts/build.py`. Файлы появятся в `build/release`. Сборка из установленного профиля Modrinth App через `build.ps1` тоже доступна.
 
