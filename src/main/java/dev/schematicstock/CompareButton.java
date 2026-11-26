@@ -9,7 +9,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 
 public final class CompareButton extends Button {
-    private static final Identifier ICON = Identifier.withDefaultNamespace("icon/search");
+    private static final Identifier ICON = Identifier.fromNamespaceAndPath("schematic_stock", "icon/checklist");
 
     public CompareButton(OnPress onPress) {
         super(0, 0, 18, 18, Component.translatable("schematic_stock.check"), onPress, DEFAULT_NARRATION);
