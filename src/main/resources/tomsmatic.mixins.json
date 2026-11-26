@@ -3,7 +3,7 @@
   "package": "dev.schematicstock.mixin",
   "compatibilityLevel": "JAVA_25",
   "mixins": ["WirelessOpenMixin"],
-  "client": ["TerminalScreenMixin", "EasyPlaceMixin", "EasyPlaceRewriteMixin"],
+  "client": ["TerminalScreenMixin", "TerminalOpenScreenMixin", "EasyPlaceMixin", "EasyPlaceRewriteMixin"],
   "injectors": {
     "defaultRequire": 1
   }

@@ -2,6 +2,7 @@ package dev.schematicstock;
 
 import com.tom.storagemod.menu.CraftingTerminalMenu;
 import com.tom.storagemod.screen.AbstractStorageTerminalScreen;
+import com.tom.storagemod.util.IDataReceiver;
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.schematicstock.refill.RefillSetting;
 import java.util.ArrayList;
@@ -21,15 +22,16 @@ import net.minecraft.world.entity.player.StackedItemContents;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.display.SlotDisplayContext;
+import net.minecraft.world.level.storage.ValueInput;
 
-final class StockScreen extends Screen {
+final class StockScreen extends Screen implements IDataReceiver {
     private static final int ROW_HEIGHT = 20;
     private static final int LIST_TOP = 62;
     private static final long SCROLL_DURATION_NANOS = 120_000_000;
     private final String source;
     private final List<StockRow> rows;
     private final long missingTypes;
-    private final AbstractStorageTerminalScreen<?> terminal;
+    private AbstractStorageTerminalScreen<?> terminal;
     private final boolean returnToTerminal;
     private final CraftingRecipes recipes;
     private final ItemStack craftIcon;
@@ -52,6 +54,19 @@ final class StockScreen extends Screen {
         recipes = terminal != null && terminal.getMenu() instanceof CraftingTerminalMenu
             ? new CraftingRecipes(minecraft.player.getRecipeBook(), SlotDisplayContext.fromLevel(minecraft.level)) : null;
         craftIcon = recipes == null ? ItemStack.EMPTY : new ItemStack(Items.CRAFTING_TABLE);
+    }
+
+    boolean attachTerminal(AbstractStorageTerminalScreen<?> terminal) {
+        if (this.terminal != null) return false;
+        this.terminal = terminal;
+        return true;
+    }
+
+    @Override
+    public void receive(ValueInput data) {
+        // Tom's dispatches stock packets to the screen that is currently visible.
+        var active = activeTerminal();
+        if (active != null) active.receive(data);
     }
 
     @Override
@@ -110,20 +125,22 @@ final class StockScreen extends Screen {
 
     @Override
     public void onClose() {
-        if (hasActiveTerminal()) {
-            if (returnToTerminal) minecraft.gui.setScreen(terminal);
-            else terminal.onClose();
+        var active = activeTerminal();
+        if (active != null) {
+            if (returnToTerminal) minecraft.gui.setScreen(active);
+            else active.onClose();
         } else {
             super.onClose();
         }
     }
 
-    private boolean hasActiveTerminal() {
-        return terminal != null && minecraft.player != null && minecraft.player.containerMenu == terminal.getMenu();
+    AbstractStorageTerminalScreen<?> activeTerminal() {
+        return terminal != null && minecraft.player != null && minecraft.player.containerMenu == terminal.getMenu()
+            ? terminal : null;
     }
 
     private void craft(StockRow row) {
-        if (!hasActiveTerminal() || minecraft.gameMode == null) {
+        if (activeTerminal() == null || minecraft.gameMode == null) {
             craftStatus = label("craft_terminal_unavailable");
             return;
         }

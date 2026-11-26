@@ -23,6 +23,7 @@ import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.network.chat.Component;
 
@@ -107,24 +108,32 @@ public final class SchematicStock implements ClientModInitializer {
         }
     }
 
+    public static void keepMaterialsVisible(Minecraft client, Screen previousScreen) {
+        var request = pending;
+        if (request == null || request.waitingForMaterials || previousScreen != request.report
+            || client.level != request.level || client.player == null
+            || !(client.gui.screen() instanceof AbstractStorageTerminalScreen<?> terminal)
+            || terminal.getMenu() != client.player.containerMenu) return;
+
+        if (request.report.attachTerminal(terminal)) client.gui.setScreen(request.report);
+    }
+
     private static void pollTerminal(Minecraft client) {
         var request = pending;
         if (request == null) return;
-        var screen = client.gui.screen();
         if (client.level != request.level || client.player == null
-            || (screen != request.report && !(screen instanceof AbstractStorageTerminalScreen<?>))) {
+            || client.gui.screen() != request.report) {
             pending = null;
             return;
         }
         if (request.waitingForMaterials) {
-            if (screen != request.report || ++request.age >= 200) pending = null;
+            if (++request.age >= 200) pending = null;
             else if (!request.source.getMaterialsAll().isEmpty()) showStandalone(client, request.source);
             return;
         }
         boolean timedOut = ++request.age >= 60;
-        if (screen instanceof AbstractStorageTerminalScreen<?> terminal
-            && terminal.getMenu() instanceof StorageTerminalMenu menu
-            && client.player.containerMenu == menu && menu.getCarried().isEmpty()) {
+        var terminal = request.report.activeTerminal();
+        if (terminal != null && terminal.getMenu() instanceof StorageTerminalMenu menu && menu.getCarried().isEmpty()) {
             if (!timedOut && !stockReady(menu)) return;
             pending = null;
             boolean ready = stockReady(menu);
