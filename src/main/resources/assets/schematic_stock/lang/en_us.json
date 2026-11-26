@@ -1,7 +1,8 @@
 {
   "schematic_stock.check": "Check schematic",
-  "schematic_stock.select_list": "Open the schematic's material list in Litematica first.",
+  "schematic_stock.select_list": "Select a schematic placement or open its material list in Litematica.",
   "schematic_stock.empty_list": "The material list is empty or still being calculated.",
+  "schematic_stock.materials_loading": "Litematica is calculating the material list…",
   "schematic_stock.waiting": "The terminal is still loading its inventory. Try again in a moment.",
   "schematic_stock.waiting_network": "Stock is unavailable. Wait a moment or check the terminal's storage connection.",
   "schematic_stock.carried": "Put the item on your cursor into a slot before comparing.",

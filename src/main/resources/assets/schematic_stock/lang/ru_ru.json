@@ -1,7 +1,8 @@
 {
   "schematic_stock.check": "Сверить схему",
-  "schematic_stock.select_list": "Сначала открой список материалов нужной схемы в Litematica.",
+  "schematic_stock.select_list": "Выбери размещение схемы или открой её список материалов в Litematica.",
   "schematic_stock.empty_list": "Список материалов пуст или ещё рассчитывается.",
+  "schematic_stock.materials_loading": "Litematica рассчитывает список материалов…",
   "schematic_stock.waiting": "Терминал ещё получает остатки. Попробуй снова через секунду.",
   "schematic_stock.waiting_network": "Остатки пока недоступны. Подожди или проверь, подключён ли терминал к хранилищу.",
   "schematic_stock.carried": "Положи предмет с курсора в слот и повтори сверку.",

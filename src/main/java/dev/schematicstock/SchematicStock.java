@@ -9,7 +9,6 @@ import com.tom.storagemod.screen.AbstractStorageTerminalScreen;
 import com.tom.storagemod.util.PlayerInvUtil;
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.schematicstock.refill.RefillClient;
-import fi.dy.masa.litematica.data.DataManager;
 import fi.dy.masa.litematica.gui.GuiMaterialList;
 import fi.dy.masa.litematica.materials.MaterialListBase;
 import java.util.Comparator;
@@ -29,6 +28,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.network.chat.Component;
 
 public final class SchematicStock implements ClientModInitializer {
+    private static final int UNTRACKED_MATERIAL_WAIT_TICKS = 200;
     private static final int STOCK_WAIT_TICKS = 200;
     static final KeyMapping OPEN_MATERIALS_KEY = new KeyMapping("key.schematic_stock.materials",
         InputConstants.UNKNOWN.getValue(), KeyMapping.Category.MISC);
@@ -57,9 +57,13 @@ public final class SchematicStock implements ClientModInitializer {
     }
 
     public static Component compare(Minecraft client, AbstractStorageTerminalScreen<?> terminal) {
-        MaterialListBase source = SELECTION.forLevel(client);
+        if (!FabricLoader.getInstance().isModLoaded("litematica")) return message("select_list");
+        MaterialListBase source = SELECTION.forComparison(client);
         if (source == null) {
             return message("select_list");
+        }
+        if (source instanceof PlacementMaterialLoad load && load.prepareMaterials()) {
+            return message("materials_loading");
         }
         if (source.getMaterialsAll().isEmpty()) {
             return message("empty_list");
@@ -84,26 +88,27 @@ public final class SchematicStock implements ClientModInitializer {
         if (client.level == null || client.player == null || !client.player.isAlive()
             || client.player.containerMenu != client.player.inventoryMenu) return message("materials_unavailable");
         if (!FabricLoader.getInstance().isModLoaded("litematica")) return message("select_list");
-        MaterialListBase source = SELECTION.forLevel(client);
-        if (source == null) {
-            var placement = DataManager.getSchematicPlacementManager().getSelectedSchematicPlacement();
-            if (placement == null) return message("select_list");
-            source = placement.getMaterialList();
-        }
-        if (source.getMaterialsAll().isEmpty()) {
-            var report = new StockScreen(source.getName(), List.of(), null, false);
-            client.gui.setScreen(report);
+        MaterialListBase source = SELECTION.forComparison(client);
+        if (source == null) return message("select_list");
+        boolean waiting = source instanceof PlacementMaterialLoad load
+            ? load.prepareMaterials() : source.getMaterialsAll().isEmpty();
+        var report = new StockScreen(source.getName(), List.of(), null, false);
+        report.setMaterialsLoading(waiting);
+        client.gui.setScreen(report);
+        if (waiting) {
             pending = new PendingOpen(client.level, source, report, true);
-            return null;
+        } else {
+            showStandalone(client, source, report);
         }
-        showStandalone(client, source);
         return null;
     }
 
-    private static void showStandalone(Minecraft client, MaterialListBase source) {
+    private static void showStandalone(Minecraft client, MaterialListBase source, StockScreen report) {
         pending = null;
-        var report = new StockScreen(source.getName(), compareMaterials(source, item -> -1), null, false);
-        client.gui.setScreen(report);
+        report.setMaterialsLoading(false);
+        var rows = compareMaterials(source, item -> -1);
+        report.updateRows(rows);
+        if (rows.isEmpty()) return;
         boolean hasWirelessTerminal = PlayerInvUtil.findItem(client.player,
             stack -> stack.getItem() instanceof WirelessTerminal terminal && terminal.canOpen(stack),
             false, stack -> true);
@@ -133,8 +138,9 @@ public final class SchematicStock implements ClientModInitializer {
             return;
         }
         if (request.waitingForMaterials) {
-            if (++request.age >= 200) pending = null;
-            else if (!request.source.getMaterialsAll().isEmpty()) showStandalone(client, request.source);
+            boolean waiting = request.source instanceof PlacementMaterialLoad load ? load.materialsLoading()
+                : request.source.getMaterialsAll().isEmpty() && ++request.age < UNTRACKED_MATERIAL_WAIT_TICKS;
+            if (!waiting) showStandalone(client, request.source, request.report);
             return;
         }
         if (request.age < STOCK_WAIT_TICKS) request.age++;

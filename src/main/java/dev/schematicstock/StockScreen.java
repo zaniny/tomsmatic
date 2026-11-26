@@ -36,6 +36,7 @@ final class StockScreen extends Screen implements IDataReceiver {
     private CraftingRecipes recipes;
     private ItemStack craftIcon = ItemStack.EMPTY;
     private boolean stockLoading;
+    private boolean materialsLoading;
     private Component craftStatus;
     private StockList stockList;
     private int left;
@@ -79,6 +80,10 @@ final class StockScreen extends Screen implements IDataReceiver {
         this.stockLoading = stockLoading;
     }
 
+    void setMaterialsLoading(boolean materialsLoading) {
+        this.materialsLoading = materialsLoading;
+    }
+
     @Override
     public void receive(ValueInput data) {
         // Tom's dispatches stock packets to the screen that is currently visible.
@@ -119,7 +124,8 @@ final class StockScreen extends Screen implements IDataReceiver {
         graphics.centeredText(font, title, width / 2, 10, 0xffffffff);
         graphics.centeredText(font, fit(source, right - left), width / 2, 22, 0xffb4c4d8);
         boolean unknown = rows.isEmpty() || rows.getFirst().available() < 0;
-        Component status = craftStatus != null ? craftStatus : rows.isEmpty() ? label("empty_list")
+        Component status = craftStatus != null ? craftStatus
+            : rows.isEmpty() ? label(materialsLoading ? "materials_loading" : "empty_list")
             : unknown ? label(stockLoading ? "stock_loading" : "stock_unknown")
             : missingTypes == 0 ? label("enough") : label("missing_types", missingTypes, rows.size());
         graphics.centeredText(font, fit(status.getString(), width - 16), width / 2, 34,
