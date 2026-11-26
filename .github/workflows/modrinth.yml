@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: Published GitHub release tag, e.g. v0.3.7
+        description: Published GitHub release tag, e.g. v0.3.8
         required: true
         type: string
 

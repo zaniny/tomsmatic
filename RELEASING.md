@@ -4,19 +4,19 @@ Tomsmatic — мод для Fabric. Fabric загружает мод, а пуб�
 
 ## 1. Перенести коммиты в рабочую папку
 
-Сохрани `Tomsmatic.bundle` в папку загрузок. Если `C:\Code\Mods\Tomsmatic` уже содержит подготовленный ранее Git-репозиторий, открой PowerShell и выполни:
+Сохрани `Tomsmatic-0.3.8.bundle` в папку загрузок. Если `C:\Code\Mods\Tomsmatic` уже содержит подготовленный ранее Git-репозиторий, открой PowerShell и выполни:
 
 ```powershell
 Set-Location 'C:\Code\Mods\Tomsmatic'
 git status --short --branch
-git fetch "$env:USERPROFILE\Downloads\Tomsmatic.bundle" main
+git fetch "$env:USERPROFILE\Downloads\Tomsmatic-0.3.8.bundle" main
 git merge --ff-only FETCH_HEAD
 ```
 
 Если ветки разошлись, `--ff-only` остановит слияние. Сохрани свои правки и проверь историю перед объединением. Если папка пуста или ещё не существует, вместо команд выше выполни:
 
 ```powershell
-git clone --branch main --origin bundle "$env:USERPROFILE\Downloads\Tomsmatic.bundle" 'C:\Code\Mods\Tomsmatic'
+git clone --branch main --origin bundle "$env:USERPROFILE\Downloads\Tomsmatic-0.3.8.bundle" 'C:\Code\Mods\Tomsmatic'
 Set-Location 'C:\Code\Mods\Tomsmatic'
 ```
 
@@ -41,16 +41,16 @@ git push -u origin main
 
 ## 3. Собрать GitHub Release
 
-В примере выпускается текущая версия `0.3.7`. У следующих релизов обновляй версию в `src/main/resources/fabric.mod.json` перед созданием тега. Используй новый тег для каждого выпуска.
+В примере выпускается текущая версия `0.3.8`. У следующих релизов обновляй версию в `src/main/resources/fabric.mod.json` перед созданием тега. Используй новый тег для каждого выпуска.
 
 ```powershell
 git switch main
 git pull --ff-only
-git tag -a v0.3.7 -m "Tomsmatic 0.3.7"
-git push origin v0.3.7
+git tag -a v0.3.8 -m "Tomsmatic 0.3.8"
+git push origin v0.3.8
 ```
 
-После успешной сборки в **Releases** появится черновик с `tomsmatic-0.3.7.jar` и файлом SHA-256. Проверь примечания к релизу, скачай JAR для проверки в отдельном профиле Fabric, затем нажми **Publish release**. Версия тега должна совпадать с версией в JAR.
+После успешной сборки в **Releases** появится черновик с `tomsmatic-0.3.8.jar` и файлом SHA-256. Примечания берутся из раздела `## 0.3.8` в [CHANGELOG.md](CHANGELOG.md). Для нового тега добавь одноимённый раздел в журнал до отправки тега. Проверь JAR в отдельном профиле Fabric, затем нажми **Publish release**.
 
 Чтобы запустить ту же сборку локально, поставь Python 3.11 или новее и JDK 25, затем запусти `python scripts/build.py`. Файлы появятся в `build/release`. Сборка из установленного профиля Modrinth App через `build.ps1` тоже доступна.
 
@@ -58,8 +58,8 @@ git push origin v0.3.7
 
 ## 4. Сделать первую публикацию на Modrinth
 
-1. Войди в Modrinth и создай проект типа **Mod**. Название — **Tomsmatic**. В описании укажи сверку материалов Litematica с Tom’s Simple Storage и опциональную автовыдачу для Easy Place.
-2. Добавь ссылку на исходники GitHub, лицензию, иконку и описание установки. Укажи, что мод работает на клиенте, а установка Tomsmatic на сервере нужна для бесшовной автовыдачи. Для клиентской сверки нужны Litematica и MaLiLib, для связи с хранилищем — Tom’s Simple Storage.
+1. Войди в Modrinth и создай проект типа **Mod** с названием **Tomsmatic**. Для короткого описания подойдёт `Compare Litematica materials with Tom’s Simple Storage and optionally refill Easy Place.` Для полного описания используй [MODRINTH.md](MODRINTH.md).
+2. Добавь ссылку на исходники GitHub и лицензию. Для страницы Modrinth используй свою иконку, сделанную вручную. Иконка в JAR и README сгенерирована, а текст страницы подготовлен с помощью ИИ. Укажи это в раскрытии использования ИИ на Modrinth и проверь применимость [правил публикации](https://modrinth.com/legal/rules/) к проекту.
 3. Создай первую версию вручную. Прикрепи JAR из GitHub Release, выбери **Minecraft 26.3**, загрузчик **Fabric** и канал **Release**. Добавь **Fabric API** и **Tom’s Simple Storage** как обязательные зависимости. Укажи **Litematica**, **MaLiLib** и **Mod Menu** в связанных зависимостях. В универсальном JAR они опциональны для сервера. На клиенте для самой сверки требуются Litematica и MaLiLib.
 4. Открой страницу проекта, проверь карточку версии и отправь проект на модерацию, когда интерфейс предложит **Submit for review**.
 

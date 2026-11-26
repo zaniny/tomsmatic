@@ -85,6 +85,9 @@ def pack(classes, output, metadata):
     russian = read_json(LANGUAGES / "ru_ru.json")
     if english.keys() != russian.keys():
         raise ValueError("English and Russian translation keys differ")
+    icon = metadata.get("icon")
+    if icon and not (RESOURCES / icon).is_file():
+        raise ValueError(f"Icon declared in mod metadata is missing: {icon}")
 
     class_names = [name for items in metadata["entrypoints"].values() for name in items]
     for config in metadata["mixins"]:
@@ -109,6 +112,15 @@ def pack(classes, output, metadata):
         output.writestr(info, license_file.read_bytes(), compress_type=zipfile.ZIP_DEFLATED)
 
 
+def release_notes(version):
+    changelog = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
+    sections = re.split(r"^## +([^\n]+)\n", changelog, flags=re.MULTILINE)
+    for heading, body in zip(sections[1::2], sections[2::2]):
+        if heading.strip() == version and body.strip():
+            return body.strip() + "\n"
+    raise ValueError(f"No release notes for {version} in CHANGELOG.md")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--cache", type=Path, default=ROOT / "build/ci-cache")
@@ -121,6 +133,7 @@ def main():
         parser.error("fabric.mod.json must contain a version of the form X.Y.Z")
     if args.tag and args.tag != f"v{version}":
         parser.error(f"Tag {args.tag} does not match fabric.mod.json version {version}")
+    notes = release_notes(version) if args.tag else None
 
     args.output.mkdir(parents=True, exist_ok=True)
     artifact = args.output / f"tomsmatic-{version}.jar"
@@ -141,6 +154,8 @@ def main():
                 raise ValueError("Corrupt release JAR")
         jar.replace(artifact)
     artifact.with_suffix(".jar.sha256").write_text(f"{digest(artifact, 'sha256')}  {artifact.name}\n", encoding="utf-8")
+    if notes:
+        artifact.with_suffix(".md").write_text(notes, encoding="utf-8")
     print(artifact)
 
 
