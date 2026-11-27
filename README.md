@@ -1,60 +1,62 @@
 # Tomsmatic
 
-<img src="src/main/resources/assets/schematic_stock/icon.png" width="96" alt="Иконка Tomsmatic">
+[Русская версия](README_ru.md)
 
-Tomsmatic сверяет материалы схемы Litematica с сетью Tom’s Simple Storage. В одном отчёте видно, сколько нужно, сколько уже поставлено, что есть на складе и чего ещё не хватает. Отчёт открывается из терминала или по хоткею. Для строительства в Easy Place можно включить автовыдачу со склада.
+<img src="src/main/resources/assets/schematic_stock/icon.png" width="96" alt="Tomsmatic icon">
 
-Мод для **Minecraft Java 26.3** и **Fabric**. [История версий](CHANGELOG.md) · [Описание для Modrinth](MODRINTH.md)
+Tomsmatic compares the materials in a Litematica schematic with the items in your Tom’s Simple Storage network. One report shows how much you need, what you’ve already placed, what’s in stock, and what you’re still missing. Open it from the terminal or with a hotkey. When building with Easy Place, you can also enable automatic restocking from your storage network.
 
-## Установка
+For **Minecraft Java 26.3** and **Fabric**. [Changelog](CHANGELOG.md) · [Modrinth description](MODRINTH.md)
 
-Скопируй `build/tomsmatic-0.3.12.jar` в папку `mods` профиля. При обновлении убери предыдущий JAR Tomsmatic из `mods` и перезапусти клиент. Версии для этой сборки приведены в таблице.
+## Installation
 
-| Компонент | Версия |
+Copy `build/tomsmatic-0.3.12.jar` into your profile’s `mods` folder. When updating, remove the previous Tomsmatic JAR from `mods` and restart the client. This build uses the following versions.
+
+| Component | Version |
 | --- | --- |
 | Minecraft Java Edition | 26.3 |
 | Fabric Loader | 0.19.5 |
-| Fabric API | От 0.162.0 для Minecraft 26.3 |
+| Fabric API | 0.162.0 or later for Minecraft 26.3 |
 | Litematica | 0.29.1 |
 | MaLiLib | 0.30.2 |
 | Tom’s Simple Storage | 2.12.1 |
 
-На сервере достаточно Tom’s Simple Storage и его зависимостей для сверки и клиентского режима автовыдачи. Для бесшовной выдачи установи тот же JAR Tomsmatic на сервер и перезапусти его. Litematica и MaLiLib нужны на клиенте.
+Material checks and client-side auto-refill work on a server running Tom’s Simple Storage and its dependencies. For seamless auto-refill, install the same Tomsmatic JAR on the server and restart it. Litematica and MaLiLib are required on the client.
 
-Если Tomsmatic установлен на сервере, клиенты с обычным набором модов сервера могут подключаться без Tomsmatic и пользоваться штатным терминалом. В интерфейсе Tomsmatic русский и английский переводы выбираются по языку Minecraft.
+If Tomsmatic is installed on the server, clients with the server’s usual mod set can still connect without Tomsmatic and use the standard terminal. Tomsmatic’s interface uses Russian or English according to Minecraft’s language setting.
 
-## Сверка
+## Checking materials
 
-1. В Litematica открой схему и её список материалов. Дождись появления строк.
-2. Открой терминал той сети, с которой хочешь свериться. Подойдут обычный терминал, терминал крафта и беспроводной терминал, если он открывает эту сеть по правилам Tom’s Simple Storage.
-3. Нажми кнопку **Сверить схему** со значком сундука и галочкой под индикатором уровня маяка. Откроется отчёт с колонками **Нужно**, **Поставлено**, **На складе** и **Не хватает**. Строки с самым большим дефицитом идут первыми. При наведении на строку подсказка показывает общее и недостающее количество в стаках и штуках.
+1. In Litematica, open a schematic and its material list. Wait for the rows to appear.
+2. Open a terminal for the network you want to check. You can use a regular terminal, a crafting terminal, or a wireless terminal that can access the network under Tom’s Simple Storage rules.
+3. Click **Check schematic**, the chest-and-checkmark button below the beacon level indicator. The report shows **Required**, **Placed**, **In stock**, and **Shortfall**. The largest shortfalls appear first. Hover over a row to see the total and shortfall in stacks and individual items.
 
-Tomsmatic использует последний открытый список материалов в текущем измерении. Если список ещё не открывали, Tomsmatic использует выбранное размещение схемы и при необходимости запускает расчёт Litematica в фоне. При открытии отчёта Litematica пересчитывает материалы размещённой схемы. **Нужно** показывает общее количество с множителем Litematica, а **Поставлено** показывает то, что уже совпадает со схемой в мире. **Не хватает** вычитает из нужного количества поставленные блоки и остатки терминала. Для списка из файла схемы без размещения колонка **Поставлено** показывает прочерк. Личный инвентарь и ресурсы для будущего крафта в расчёт не входят.
+Tomsmatic uses the last material list you opened in the current dimension. If you haven’t opened a list yet, Tomsmatic uses the selected schematic placement and starts Litematica’s calculation in the background if needed. When you open the report, Litematica recalculates the materials for the placed schematic. **Required** includes Litematica’s multiplier. **Placed** counts blocks in the world that already match the schematic. **Shortfall** subtracts the placed blocks and terminal stock from the required amount. For a list opened directly from a schematic file without a placement, **Placed** shows a dash. The calculation excludes your personal inventory and ingredients for items that could be crafted later.
 
-Для `.schem` (Sponge/WorldEdit) и ванильных структур `.nbt` открой или импортируй файл через Litematica и сформируй список материалов тем же способом, что для `.litematic`.
+For `.schem` files (Sponge/WorldEdit) and vanilla `.nbt` structures, open or import the file in Litematica and generate its material list the same way you would for a `.litematic` file.
 
-В отчёте один щелчок колеса прокручивает список на одну строку. Можно также листать стрелками ↑ и ↓ или перетащить полосу справа.
+Each mouse wheel notch scrolls the report by one row. You can also use the ↑ and ↓ arrow keys or drag the scrollbar on the right.
 
-При открытии отчёта из терминала **Закрыть** и **Esc** возвращают в прежнее окно терминала. Для отдельного открытия зайди в **Mod Menu → Tomsmatic → Настройки**. Нажми **Хоткей списка** и выбери клавишу. **Esc** отменяет назначение, **Сбросить** убирает привязку. Там же есть кнопка **Открыть список материалов**. При открытии списка Tomsmatic загружает остатки через беспроводной терминал в фоне. Пока данные загружаются или сеть недоступна, в колонке **На складе** стоят прочерки. Такой список закрывается сразу в игру.
+If you open the report from a terminal, **Close** and **Esc** return you to that terminal. To open the report on its own, go to **Mod Menu → Tomsmatic → Settings**. Click **Material list key** and press the key you want to assign. **Esc** cancels the assignment, and **Clear** removes the binding. You can also click **Open material list** there. When opened this way, Tomsmatic fetches stock through the wireless terminal in the background. **In stock** shows dashes while the data loads or the network is unavailable. Closing this report takes you straight back to the game.
 
-С терминалом крафта справа появляется колонка **Крафт**. Нажатие на верстак у предмета открывает терминал и отправляет штатный запрос на заполнение сетки. Иконка доступна для рецептов, открытых в книге рецептов Minecraft. Если подходящих ингредиентов не хватает, список покажет сообщение и сохранит текущую сетку. Для крафта из списка, открытого горячей клавишей или настройками, нужен привязанный улучшенный беспроводной терминал, который открывает именно терминал крафта.
+When you use a crafting terminal, the **Craft** column appears on the right. Clicking the crafting table icon in a row opens the terminal and uses its standard request to fill the crafting grid. The icon is available for recipes you’ve unlocked in Minecraft’s recipe book. If there aren’t enough ingredients, the report shows a message and keeps the current grid intact. To craft from a report opened with the hotkey or from settings, you need a linked Advanced Wireless Terminal that opens a crafting terminal.
 
-## Автовыдача Easy Place
+## Easy Place auto-refill
 
-1. В отчёте сверки включи **Автовыдача для Easy Place**. Настройка сохраняется в профиле и по умолчанию выключена.
-2. Привяжи **улучшенный беспроводной терминал** к сети и держи его в инвентаре. Проверь, что штатная клавиша Tom’s Simple Storage открывает нужную сеть там, где ты строишь.
-3. Включи Easy Place в Litematica и попробуй поставить блок, предмета для которого нет в инвентаре. Tomsmatic запрашивает до одного обычного стака и после обновления инвентаря повторяет попытку по той же цели.
+1. Turn on **Easy Place auto-refill** in the report. The setting is saved in your profile and is off by default.
+2. Link an **Advanced Wireless Terminal** to the network and keep it in your inventory. Check that the normal Tom’s Simple Storage keybind opens the right network where you’re building.
+3. Enable Easy Place in Litematica and try to place a block you don’t have in your inventory. Tomsmatic requests up to one standard stack and retries placement at the same spot after your inventory updates.
 
-Если сервер поддерживает бесшовную выдачу, предмет приходит напрямую в инвентарь. На сервере с одним Tom’s Simple Storage терминал кратковременно открывается для штатной выдачи. При недоступной сети, отсутствии предмета или заполненном инвентаре появляется сообщение.
+If the server supports seamless auto-refill, the item goes directly into your inventory. On a server running only Tom’s Simple Storage, the terminal briefly opens to withdraw the item normally. Tomsmatic shows a message if the network is unavailable, the item is out of stock, or your inventory is full.
 
-## Сборка из исходников
+## Building from source
 
-Для сборки без установленного игрового профиля выполни `python scripts/build.py` с Python 3.11+ и JDK 25. JAR и контрольная сумма появятся в `build/release`. Порядок настройки GitHub Actions и публикации описан в [RELEASING.md](RELEASING.md).
+To build without an installed game profile, run `python scripts/build.py` with Python 3.11+ and JDK 25. The JAR and its checksum go into `build/release`. See [RELEASING.md](RELEASING.md) for GitHub Actions setup and publishing instructions.
 
-Скрипт использует локальные файлы профиля Modrinth и JDK 25. В PowerShell 7 выполни из папки проекта:
+The PowerShell build uses local files from your Modrinth profile and JDK 25. Run the following command from the project folder in PowerShell 7.
 
 ```powershell
 .\build.ps1 -Jdk 'C:\Program Files\JetBrains\JetBrains Rider 2026.1.2\jbr'
 ```
 
-Для другого профиля передай `-Profile`, для другой папки Modrinth App передай `-Modrinth`. Для компиляции интеграции с настройками скрипт берёт Mod Menu из профиля, либо из файла, указанного в `-ModMenuJar`. При настроенной переменной `JAVA_HOME` с JDK 25 и Mod Menu в профиле можно вызвать `./build.ps1` без параметров. Результат сборки находится в `build/tomsmatic-0.3.12.jar`.
+Use `-Profile` to select another profile or `-Modrinth` to point to another Modrinth App folder. To compile the settings integration, the script uses Mod Menu from the profile or the file supplied through `-ModMenuJar`. If `JAVA_HOME` points to JDK 25 and the profile contains Mod Menu, you can run `./build.ps1` without arguments. The output is `build/tomsmatic-0.3.12.jar`.
