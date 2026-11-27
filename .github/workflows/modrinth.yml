@@ -69,6 +69,7 @@ jobs:
           api="https://api.modrinth.com/v2"
           agent="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY (Tomsmatic release workflow)"
           curl --fail --silent --show-error --user-agent "$agent" \
+            --header "Authorization: $MODRINTH_TOKEN" \
             "$api/project/$MODRINTH_PROJECT_ID/version" > versions.json
           if jq -e --arg v "$modrinth_version" 'any(.[]; .version_number == $v)' versions.json > /dev/null; then
             echo "Version $modrinth_version already exists on Modrinth."
