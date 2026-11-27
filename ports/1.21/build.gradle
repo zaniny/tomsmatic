@@ -11,7 +11,11 @@ def targets = [
     '1.21.10': [fabricApi: '0.138.4', storage: '2.7.0', litematica: '0.24.9', malilib: '0.26.8',
                 mods: ['XZNI4Cpy:Gk2tI0ZM', 'bEpr0Arc:c91sTAlP', 'GcWjdA9I:VwmyInJJ', 'mOgUt4GM:pYbFlVtR']],
     '1.21.8': [fabricApi: '0.136.1', storage: '2.6.0', litematica: '0.23.7', malilib: '0.25.7',
-               mods: ['XZNI4Cpy:eOUsxNs8', 'bEpr0Arc:GJMDd9Zq', 'GcWjdA9I:2kC79eY3', 'mOgUt4GM:ku5NivOP']]
+               mods: ['XZNI4Cpy:eOUsxNs8', 'bEpr0Arc:GJMDd9Zq', 'GcWjdA9I:2kC79eY3', 'mOgUt4GM:ku5NivOP']],
+    '1.21.7': [fabricApi: '0.129.0', storage: '2.6.0', litematica: '0.23.7', malilib: '0.25.7',
+               mods: ['XZNI4Cpy:eOUsxNs8', 'bEpr0Arc:GJMDd9Zq', 'GcWjdA9I:2kC79eY3', 'mOgUt4GM:ku5NivOP']],
+    '1.21.6': [fabricApi: '0.128.2', storage: '2.4.1', litematica: '0.23.7', malilib: '0.25.7',
+               mods: ['XZNI4Cpy:YTzOMaus', 'bEpr0Arc:GJMDd9Zq', 'GcWjdA9I:2kC79eY3', 'mOgUt4GM:ku5NivOP']]
 ]
 def minecraftVersion = providers.gradleProperty('minecraftVersion').getOrElse('1.21.11')
 def target = targets[minecraftVersion]
@@ -19,6 +23,7 @@ if (target == null) {
     throw new GradleException("Unsupported Minecraft version: $minecraftVersion")
 }
 def fabricApi = target.fabricApi
+def legacyInput = minecraftVersion in ['1.21.6', '1.21.7', '1.21.8']
 def loader = '0.19.5'
 def storage = target.storage
 def litematica = target.litematica
@@ -55,15 +60,16 @@ def versionSpecific = [
 
 sourceSets.main {
     java.srcDir sharedJava
-    def variant = file("src/$minecraftVersion/java")
+    def variant = file(legacyInput ? 'src/1.21.8/java' : "src/$minecraftVersion/java")
     def resourceLocationSources = file('src/resource-location/java')
-    java.srcDir variant
-    if (minecraftVersion != '1.21.11') java.srcDir resourceLocationSources
+    def overrides = []
+    if (minecraftVersion == '1.21.6') overrides.add(file('src/1.21.6/java'))
+    overrides.add(variant)
+    if (minecraftVersion != '1.21.11') overrides.add(resourceLocationSources)
+    overrides.each { java.srcDir it }
     java.exclude { entry ->
-        if (entry.file.toPath().startsWith(variant.toPath()) ||
-            entry.file.toPath().startsWith(resourceLocationSources.toPath())) return false
-        if (new File(variant, entry.path).isFile()) return true
-        if (minecraftVersion != '1.21.11' && new File(resourceLocationSources, entry.path).isFile()) return true
+        def override = overrides.find { new File(it, entry.path).isFile() }
+        if (override != null) return !entry.file.toPath().startsWith(override.toPath())
         entry.file.toPath().startsWith(sharedJava.toPath()) && versionSpecific.contains(entry.path)
     }
     resources.srcDir new File(shared, 'resources')
@@ -80,7 +86,7 @@ tasks.named('processResources') {
     filesMatching('tomsmatic.mixins.json') {
         filter { line ->
             def adapted = line.replace('JAVA_25', 'JAVA_21')
-            minecraftVersion == '1.21.8' ? adapted.replace(', "EasyPlaceRewriteMixin"', '') : adapted
+            legacyInput ? adapted.replace(', "EasyPlaceRewriteMixin"', '') : adapted
         }
     }
     doLast {

@@ -18,7 +18,7 @@ Install Tomsmatic on the server as well if you want the refill to run without op
 
 ## Compatibility
 
-- Choose the JAR for your exact Minecraft Java Edition version. Builds are available for **1.21.8, 1.21.10, 1.21.11, 26.1, 26.1.1, 26.1.2, 26.2, and 26.3** and require **Fabric Loader 0.19.5+**. Use **Java 21+** for the 1.21 builds and **Java 25+** for 26.x.
+- Choose the JAR for your exact Minecraft Java Edition version. Builds are available for **1.21.6, 1.21.7, 1.21.8, 1.21.10, 1.21.11, 26.1, 26.1.1, 26.1.2, 26.2, and 26.3** and require **Fabric Loader 0.19.5+**. Use **Java 21+** for the 1.21 builds and **Java 25+** for 26.x.
 - Install **Fabric API** and the **Tom’s Simple Storage** version listed for your build in the project readme.
 - Install **Litematica** and **MaLiLib** on the client for schematic comparison and Easy Place.
 - **Mod Menu** is optional. The interface supports English and Russian.

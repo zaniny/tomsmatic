@@ -7,6 +7,7 @@ import com.tom.storagemod.screen.AbstractStorageTerminalScreen;
 import com.tom.storagemod.util.TerminalSyncManager.SlotAction;
 import dev.schematicstock.ClientControls;
 import dev.schematicstock.ClientScreens;
+import dev.schematicstock.TerminalReadiness;
 import dev.schematicstock.refill.RefillPackets.Reply;
 import dev.schematicstock.refill.RefillPackets.Request;
 import dev.schematicstock.refill.RefillPackets.Result;
@@ -125,8 +126,7 @@ public final class RefillClient {
             pending = null;
             return;
         }
-        boolean empty = menu.slotCount > 0 && menu.slotCount < Short.MAX_VALUE && menu.slotCount == menu.freeCount;
-        if (!menu.itemsLoaded && !empty) return;
+        if (!TerminalReadiness.hasStockData(menu)) return;
         request.stockSeen = true;
         // Tom's can send the initial list in several packets.
         var stack = menu.itemList.stream()

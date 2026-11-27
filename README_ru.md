@@ -6,7 +6,7 @@
 
 Tomsmatic сверяет материалы схемы Litematica с сетью Tom’s Simple Storage. В одном отчёте видно, сколько нужно, сколько уже поставлено, что есть на складе и чего ещё не хватает. Отчёт открывается из терминала или по хоткею. Для строительства в Easy Place можно включить автовыдачу со склада.
 
-Мод для **Minecraft Java 1.21.8, 1.21.10, 1.21.11 и 26.1–26.3** на **Fabric**. [История версий](CHANGELOG.md) · [Описание для Modrinth](MODRINTH.md)
+Мод для **Minecraft Java 1.21.6–1.21.8, 1.21.10, 1.21.11 и 26.1–26.3** на **Fabric**. [История версий](CHANGELOG.md) · [Описание для Modrinth](MODRINTH.md)
 
 ## Установка
 
@@ -14,6 +14,8 @@ Tomsmatic сверяет материалы схемы Litematica с сетью 
 
 | Minecraft Java Edition | Fabric API (минимум) | Tom’s Simple Storage | Litematica | MaLiLib |
 | --- | --- | --- | --- | --- |
+| 1.21.6 | 0.128.2 | 2.4.1 | 0.23.7 | 0.25.7 |
+| 1.21.7 | 0.129.0 | 2.6.0 | 0.23.7 | 0.25.7 |
 | 1.21.8 | 0.136.1 | 2.6.0 | 0.23.7 | 0.25.7 |
 | 1.21.10 | 0.138.4 | 2.7.0 | 0.24.9 | 0.26.8 |
 | 1.21.11 | 0.141.6 | 2.8.0 | 0.26.16 | 0.27.20 |
@@ -51,7 +53,7 @@ Tomsmatic использует последний открытый список 
 
 ## Сборка из исходников
 
-Для **сборок 1.21** выполни `gradle -p ports/1.21 build "-PminecraftVersion=1.21.11"` с Gradle 9.5.0 и JDK 21, подставив 1.21.8, 1.21.10 или 1.21.11. Fabric Loom сохранит готовый JAR в `build/port-<версия Minecraft>/libs`.
+Для **сборок 1.21** выполни `gradle -p ports/1.21 build "-PminecraftVersion=1.21.11"` с Gradle 9.5.0 и JDK 21, подставив нужную версию Minecraft из таблицы. Fabric Loom сохранит готовый JAR в `build/port-<версия Minecraft>/libs`.
 
 Для **26.x** выполни `python scripts/build.py --minecraft 26.1.2` с Python 3.11+ и JDK 25, подставив свою версию Minecraft. JAR и контрольная сумма появятся в `build/release`. Порядок настройки GitHub Actions и публикации описан в [RELEASING.md](RELEASING.md).
 

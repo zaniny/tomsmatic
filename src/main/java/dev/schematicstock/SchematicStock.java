@@ -63,7 +63,7 @@ public final class SchematicStock implements ClientModInitializer {
         if (!menu.getCarried().isEmpty()) {
             return message("carried");
         }
-        if (!stockReady(menu)) {
+        if (!TerminalReadiness.hasStockData(menu)) {
             return message(menu.slotCount <= 0 ? "waiting_network" : "waiting");
         }
         if (source instanceof PlacementMaterialLoad load) {
@@ -112,7 +112,7 @@ public final class SchematicStock implements ClientModInitializer {
         report.setMaterialsLoading(false);
         var active = report.activeTerminal();
         if (active != null && active.getMenu() instanceof StorageTerminalMenu menu) {
-            boolean ready = stockReady(menu);
+            boolean ready = TerminalReadiness.hasStockData(menu);
             var request = new PendingOpen(client.level, source, report, false);
             report.updateRows(compareMaterials(source, item -> ready ? menu.sync.getAmount(item) : -1));
             if (ready) request.lastItems = menu.itemList;
@@ -162,7 +162,7 @@ public final class SchematicStock implements ClientModInitializer {
         var terminal = request.report.activeTerminal();
         if (terminal != null && terminal.getMenu() instanceof StorageTerminalMenu menu && menu.getCarried().isEmpty()) {
             // Tom's replaces itemList on every stock packet, including chunks of the initial list.
-            if (stockReady(menu) && request.lastItems != menu.itemList) {
+            if (TerminalReadiness.hasStockData(menu) && request.lastItems != menu.itemList) {
                 request.lastItems = menu.itemList;
                 request.report.updateRows(compareMaterials(request.source, menu.sync::getAmount));
                 request.report.setStockLoading(false);
@@ -173,11 +173,6 @@ public final class SchematicStock implements ClientModInitializer {
             request.report.setStockLoading(false);
             pending = null;
         }
-    }
-
-    private static boolean stockReady(StorageTerminalMenu menu) {
-        return menu.itemsLoaded || (menu.slotCount > 0 && menu.slotCount < Short.MAX_VALUE
-            && menu.freeCount == menu.slotCount);
     }
 
     static List<StockRow> compareMaterials(MaterialListBase source,

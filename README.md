@@ -6,7 +6,7 @@
 
 Tomsmatic compares the materials in a Litematica schematic with the items in your Tom’s Simple Storage network. One report shows how much you need, what you’ve already placed, what’s in stock, and what you’re still missing. Open it from the terminal or with a hotkey. When building with Easy Place, you can also enable automatic restocking from your storage network.
 
-For **Minecraft Java 1.21.8, 1.21.10, 1.21.11, and 26.1–26.3** on **Fabric**. [Changelog](CHANGELOG.md) · [Modrinth description](MODRINTH.md)
+For **Minecraft Java 1.21.6–1.21.8, 1.21.10, 1.21.11, and 26.1–26.3** on **Fabric**. [Changelog](CHANGELOG.md) · [Modrinth description](MODRINTH.md)
 
 ## Installation
 
@@ -14,6 +14,8 @@ Copy the JAR matching your exact Minecraft version into the profile’s `mods` f
 
 | Minecraft Java Edition | Fabric API (minimum) | Tom’s Simple Storage | Litematica | MaLiLib |
 | --- | --- | --- | --- | --- |
+| 1.21.6 | 0.128.2 | 2.4.1 | 0.23.7 | 0.25.7 |
+| 1.21.7 | 0.129.0 | 2.6.0 | 0.23.7 | 0.25.7 |
 | 1.21.8 | 0.136.1 | 2.6.0 | 0.23.7 | 0.25.7 |
 | 1.21.10 | 0.138.4 | 2.7.0 | 0.24.9 | 0.26.8 |
 | 1.21.11 | 0.141.6 | 2.8.0 | 0.26.16 | 0.27.20 |
@@ -51,7 +53,7 @@ If the server supports seamless auto-refill, the item goes directly into your in
 
 ## Building from source
 
-For the **1.21 builds**, run `gradle -p ports/1.21 build "-PminecraftVersion=1.21.11"` with Gradle 9.5.0 and JDK 21. Substitute 1.21.8, 1.21.10, or 1.21.11. Fabric Loom writes the remapped JAR to `build/port-<Minecraft version>/libs`.
+For the **1.21 builds**, run `gradle -p ports/1.21 build "-PminecraftVersion=1.21.11"` with Gradle 9.5.0 and JDK 21. Substitute your target Minecraft version from the table. Fabric Loom writes the remapped JAR to `build/port-<Minecraft version>/libs`.
 
 For **26.x**, run `python scripts/build.py --minecraft 26.1.2` with Python 3.11+ and JDK 25, substituting your target Minecraft version. The JAR and its checksum go into `build/release`. See [RELEASING.md](RELEASING.md) for GitHub Actions setup and publishing instructions.
 
