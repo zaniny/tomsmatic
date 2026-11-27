@@ -1,6 +1,5 @@
 package dev.schematicstock.refill;
 
-import com.tom.storagemod.inventory.TerminalItemStack;
 import com.tom.storagemod.menu.StorageTerminalMenu;
 import com.tom.storagemod.network.NetworkHandler;
 import com.tom.storagemod.network.OpenTerminalPacket;
@@ -14,7 +13,6 @@ import fi.dy.masa.litematica.config.Configs;
 import fi.dy.masa.litematica.util.EasyPlaceUtils;
 import fi.dy.masa.litematica.util.EntityUtils;
 import fi.dy.masa.litematica.util.WorldUtils;
-import java.util.List;
 import java.util.Locale;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -132,7 +130,9 @@ public final class RefillClient {
         if (!menu.itemsLoaded && !empty) return;
         request.stockSeen = true;
         // Tom's can send the initial list in several packets.
-        var stack = findStock(request.item, menu.itemList);
+        var stack = menu.itemList.stream()
+            .filter(entry -> entry.getQuantity() > 0 && ItemStack.isSameItemSameComponents(request.item, entry.getStack()))
+            .findFirst().orElse(null);
         if (stack == null) return;
         if (request.player.getInventory().getFreeSlot() < 0) {
             finish(client, request, Result.INVENTORY_FULL);
@@ -141,15 +141,6 @@ public final class RefillClient {
         request.withdrawn = true;
         request.age = 0;
         menu.sync.sendInteract(stack, SlotAction.SHIFT_PULL, false);
-    }
-
-    static TerminalItemStack findStock(ItemStack required, List<TerminalItemStack> entries) {
-        for (var entry : entries) {
-            if (entry.getQuantity() > 0 && ItemStack.isSameItemSameComponents(required, entry.getStack())) {
-                return entry;
-            }
-        }
-        return null;
     }
 
     private static void finish(Minecraft client, Pending request, Result result) {
@@ -181,7 +172,7 @@ public final class RefillClient {
     private static void notify(Minecraft client, String reason) {
         cooldownLevel = client.level;
         retryAfter = client.level.getGameTime() + 20;
-        client.player.sendOverlayMessage(Component.translatable("schematic_stock.refill." + reason));
+        ClientScreens.showOverlay(client, Component.translatable("schematic_stock.refill." + reason));
     }
 
     private static final class Pending {

@@ -6,14 +6,15 @@
 
 Tomsmatic compares the materials in a Litematica schematic with the items in your Tom’s Simple Storage network. One report shows how much you need, what you’ve already placed, what’s in stock, and what you’re still missing. Open it from the terminal or with a hotkey. When building with Easy Place, you can also enable automatic restocking from your storage network.
 
-For **Minecraft Java 26.1–26.3** and **Fabric**. [Changelog](CHANGELOG.md) · [Modrinth description](MODRINTH.md)
+For **Minecraft Java 1.21.11 and 26.1–26.3** on **Fabric**. [Changelog](CHANGELOG.md) · [Modrinth description](MODRINTH.md)
 
 ## Installation
 
-Copy the JAR matching your exact Minecraft version into the profile’s `mods` folder. When updating, remove the previous Tomsmatic JAR and restart the client. All builds use Java 25 and Fabric Loader 0.19.5 or later.
+Copy the JAR matching your exact Minecraft version into the profile’s `mods` folder. When updating, remove the previous Tomsmatic JAR and restart the client. All builds require Fabric Loader 0.19.5 or later. Use Java 21 or later for 1.21.11 and Java 25 or later for 26.x.
 
 | Minecraft Java Edition | Fabric API (minimum) | Tom’s Simple Storage | Litematica | MaLiLib |
 | --- | --- | --- | --- | --- |
+| 1.21.11 | 0.141.6 | 2.8.0 | 0.26.16 | 0.27.20 |
 | 26.1, 26.1.1, 26.1.2 | 0.155.3 | 2.10.3 | 0.27.14 | 0.28.12 |
 | 26.2 | 0.161.0 | 2.11.4 | 0.28.8 | 0.29.6 |
 | 26.3 | 0.162.0 | 2.12.1 | 0.29.1 | 0.30.2 |
@@ -48,7 +49,9 @@ If the server supports seamless auto-refill, the item goes directly into your in
 
 ## Building from source
 
-To build without an installed game profile, run `python scripts/build.py --minecraft 26.1.2` (or select any supported version) with Python 3.11+ and JDK 25. The JAR and its checksum go into `build/release`. See [RELEASING.md](RELEASING.md) for GitHub Actions setup and publishing instructions.
+For **1.21.11**, run `gradle -p ports/1.21.11 build` with Gradle 9.5.0 and JDK 21. Fabric Loom writes the remapped JAR to `build/port-1.21.11/libs`.
+
+For **26.x**, run `python scripts/build.py --minecraft 26.1.2` with Python 3.11+ and JDK 25, substituting your target Minecraft version. The JAR and its checksum go into `build/release`. See [RELEASING.md](RELEASING.md) for GitHub Actions setup and publishing instructions.
 
 The PowerShell build uses local files from your Modrinth profile and JDK 25. Run the following command from the project folder in PowerShell 7.
 

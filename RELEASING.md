@@ -54,6 +54,8 @@ git push origin v0.3.13
 
 Чтобы запустить ту же сборку локально, поставь Python 3.11 или новее и JDK 25, затем запусти `python scripts/build.py --minecraft 26.1.2`, подставив нужную версию. Файлы появятся в `build/release`. Сборка из установленного профиля Modrinth App через `build.ps1` доступна для 26.3.
 
+Для порта 1.21.11 запусти `gradle -p ports/1.21.11 build` с Gradle 9.5.0 и JDK 21. JAR из `build/port-1.21.11/libs` входит в тот же черновик GitHub Release.
+
 [Официальная документация по релизам GitHub](https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository)
 
 ## 4. Сделать первую публикацию на Modrinth

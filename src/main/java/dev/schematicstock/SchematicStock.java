@@ -1,6 +1,6 @@
 package dev.schematicstock;
 
-import com.tom.storagemod.inventory.TerminalItemStack;
+import com.tom.storagemod.inventory.StoredItemStack;
 import com.tom.storagemod.item.WirelessTerminal;
 import com.tom.storagemod.menu.StorageTerminalMenu;
 import com.tom.storagemod.network.NetworkHandler;
@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.function.ToLongFunction;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.fabricmc.loader.api.FabricLoader;
@@ -39,13 +38,13 @@ public final class SchematicStock implements ClientModInitializer {
     public void onInitializeClient() {
         if (!FabricLoader.getInstance().isModLoaded("litematica")) return;
         RefillClient.initialize();
-        KeyMappingHelper.registerKeyMapping(OPEN_MATERIALS_KEY);
+        ClientScreens.registerKeyMapping(OPEN_MATERIALS_KEY);
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             pollTerminal(client);
             while (OPEN_MATERIALS_KEY.consumeClick()) {
                 if (client.player != null && ClientScreens.current(client) == null) {
                     Component error = openStandalone(client);
-                    if (error != null) client.player.sendOverlayMessage(error);
+                    if (error != null) ClientScreens.showOverlay(client, error);
                 }
             }
         });
@@ -184,16 +183,16 @@ public final class SchematicStock implements ClientModInitializer {
     }
 
     static List<StockRow> compareMaterials(MaterialListBase source,
-                                           ToLongFunction<TerminalItemStack> stock) {
+                                           ToLongFunction<StoredItemStack> stock) {
         boolean tracksPlacement = source instanceof PlacementMaterialLoad;
         int multiplier = source.getMultiplier();
-        var required = new LinkedHashMap<TerminalItemStack, MaterialCounts>();
+        var required = new LinkedHashMap<StoredItemStack, MaterialCounts>();
         for (var material : source.getMaterialsAll()) {
             long total = material.getCountTotal();
             long count = total * multiplier;
             if (count > 0 && !material.getStack().isEmpty()) {
                 long placed = tracksPlacement ? Math.clamp(total - material.getCountMissing(), 0, total) : 0;
-                required.merge(new TerminalItemStack(material.getStack().copyWithCount(1)),
+                required.merge(TerminalStock.key(material.getStack().copyWithCount(1)),
                     new MaterialCounts(count, placed), MaterialCounts::add);
             }
         }
@@ -223,7 +222,7 @@ public final class SchematicStock implements ClientModInitializer {
         private final MaterialListBase source;
         private final StockScreen report;
         private final boolean waitingForMaterials;
-        private List<TerminalItemStack> lastItems;
+        private List<?> lastItems;
         private int age;
 
         private PendingOpen(ClientLevel level, MaterialListBase source, StockScreen report, boolean waitingForMaterials) {

@@ -1,0 +1,74 @@
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
+
+plugins {
+    id 'net.fabricmc.fabric-loom-remap' version '1.17.20'
+}
+
+def minecraftVersion = '1.21.11'
+def fabricApi = '0.141.6'
+def loader = '0.19.5'
+def storage = '2.8.0'
+def litematica = '0.26.16'
+def malilib = '0.27.20'
+def shared = file('../../src/main')
+def sharedJava = new File(shared, 'java')
+def metadata = new JsonSlurper().parse(new File(shared, 'resources/fabric.mod.json'))
+version = metadata.version
+layout.buildDirectory = file('../../build/port-1.21.11')
+
+repositories {
+    maven {
+        url = 'https://api.modrinth.com/maven'
+        content { includeGroup 'maven.modrinth' }
+    }
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${minecraftVersion}"
+    mappings loom.officialMojangMappings()
+    modImplementation "net.fabricmc:fabric-loader:${loader}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${fabricApi}+${minecraftVersion}"
+    modImplementation 'maven.modrinth:XZNI4Cpy:FydlCSUl'
+    modImplementation 'maven.modrinth:bEpr0Arc:mengBR9D'
+    modImplementation 'maven.modrinth:GcWjdA9I:loabWpyU'
+    modImplementation 'maven.modrinth:mOgUt4GM:cLkYaVuL'
+}
+
+def versionSpecific = [
+    'dev/schematicstock/CompareButton.java',
+    'dev/schematicstock/StockScreen.java',
+    'dev/schematicstock/TerminalStock.java',
+    'dev/schematicstock/TomsmaticModMenu.java',
+    'dev/schematicstock/mixin/TerminalScreenMixin.java',
+    'dev/schematicstock/refill/RefillPayloadRegistration.java'
+] as Set
+
+sourceSets.main {
+    java.srcDir sharedJava
+    java.exclude { entry -> entry.file.toPath().startsWith(sharedJava.toPath()) && versionSpecific.contains(entry.path) }
+    resources.srcDir new File(shared, 'resources')
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.release = 21
+    options.encoding = 'UTF-8'
+}
+
+tasks.named('processResources') {
+    inputs.properties(minecraft: minecraftVersion, fabricApi: fabricApi, loader: loader,
+                      storage: storage, litematica: litematica, malilib: malilib)
+    filesMatching('tomsmatic.mixins.json') {
+        filter { line -> line.replace('JAVA_25', 'JAVA_21') }
+    }
+    doLast {
+        metadata.depends.putAll(minecraft: minecraftVersion, java: '>=21', fabricloader: ">=$loader",
+                                'fabric-api': ">=$fabricApi", toms_storage: storage)
+        metadata.suggests.putAll(litematica: litematica, malilib: malilib)
+        new File(destinationDir, 'fabric.mod.json').setText(JsonOutput.prettyPrint(JsonOutput.toJson(metadata)) + '\n', 'UTF-8')
+    }
+}
+
+tasks.named('remapJar') {
+    archiveFileName = "tomsmatic-${version}-${minecraftVersion}.jar"
+}

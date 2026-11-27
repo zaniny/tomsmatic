@@ -23,6 +23,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - {minecraft: "1.21.11", tom: "FydlCSUl", litematica: "mengBR9D", malilib: "loabWpyU"}
           - {minecraft: "26.1", tom: "9VRUBvKA", litematica: "w8P6TokG", malilib: "FItuNokS"}
           - {minecraft: "26.1.1", tom: "9VRUBvKA", litematica: "w8P6TokG", malilib: "FItuNokS"}
           - {minecraft: "26.1.2", tom: "9VRUBvKA", litematica: "w8P6TokG", malilib: "FItuNokS"}

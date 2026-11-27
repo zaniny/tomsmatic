@@ -1,6 +1,5 @@
 package dev.schematicstock.refill;
 
-import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -12,8 +11,7 @@ public final class RefillPackets {
     private RefillPackets() {}
 
     public static void register() {
-        PayloadTypeRegistry.serverboundPlay().register(Request.TYPE, Request.CODEC);
-        PayloadTypeRegistry.clientboundPlay().register(Reply.TYPE, Reply.CODEC);
+        RefillPayloadRegistration.register();
     }
 
     public record Request(int id, ItemStack item) implements CustomPacketPayload {

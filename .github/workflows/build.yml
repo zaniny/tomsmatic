@@ -37,9 +37,36 @@ jobs:
             build/release/tomsmatic-*.md
           if-no-files-found: error
 
+  build-1-21-11:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "21"
+      - uses: gradle/actions/setup-gradle@v5
+        with:
+          gradle-version: "9.5.0"
+      - name: Build the remapped Fabric JAR
+        shell: bash
+        run: |
+          gradle --project-dir ports/1.21.11 build
+          cd build/port-1.21.11/libs
+          jars=(tomsmatic-*-1.21.11.jar)
+          [[ ${#jars[@]} -eq 1 && -f "${jars[0]}" ]]
+          sha256sum "${jars[0]}" > "${jars[0]}.sha256"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tomsmatic-1.21.11
+          path: build/port-1.21.11/libs/tomsmatic-*-1.21.11.jar*
+          if-no-files-found: error
+
   github-release:
     if: github.event_name == 'push' && github.ref_type == 'tag'
-    needs: build
+    needs: [build, build-1-21-11]
     runs-on: ubuntu-24.04
     permissions:
       contents: write
@@ -47,6 +74,10 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: tomsmatic
+          path: release
+      - uses: actions/download-artifact@v4
+        with:
+          name: tomsmatic-1.21.11
           path: release
       - name: Create draft GitHub Release
         env:
