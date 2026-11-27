@@ -14,8 +14,6 @@ import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.input.KeyEvent;
-import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.StackedItemContents;
@@ -54,18 +52,17 @@ final class StockScreen extends Screen implements IDataReceiver {
         updateRows(rows);
         this.terminal = terminal;
         this.returnToTerminal = returnToTerminal;
-        enableCrafting(terminal);
     }
 
     boolean attachTerminal(AbstractStorageTerminalScreen<?> terminal) {
         if (this.terminal != null) return false;
         this.terminal = terminal;
-        enableCrafting(terminal);
         return true;
     }
 
-    private void enableCrafting(AbstractStorageTerminalScreen<?> terminal) {
-        if (terminal != null && terminal.getMenu() instanceof CraftingTerminalMenu) {
+    private void enableCrafting() {
+        if (recipes == null && terminal != null && terminal.getMenu() instanceof CraftingTerminalMenu
+            && minecraft.player != null && minecraft.level != null) {
             recipes = new CraftingRecipes(minecraft.player.getRecipeBook(), SlotDisplayContext.fromLevel(minecraft.level));
             craftIcon = new ItemStack(Items.CRAFTING_TABLE);
         }
@@ -95,6 +92,7 @@ final class StockScreen extends Screen implements IDataReceiver {
 
     @Override
     protected void init() {
+        enableCrafting();
         double previousScroll = stockList == null ? 0 : stockList.scrollTarget;
         left = Math.max(6, (width - 620) / 2);
         stockList = addRenderableWidget(new StockList(left, width - 2 * left, Math.max(1, height - LIST_TOP - 29)));
@@ -254,35 +252,35 @@ final class StockScreen extends Screen implements IDataReceiver {
         }
 
         @Override
-        public boolean keyPressed(KeyEvent event) {
-            double target = switch (event.key()) {
+        public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+            double target = switch (keyCode) {
                 case InputConstants.KEY_UP -> scrollTarget - ROW_HEIGHT;
                 case InputConstants.KEY_DOWN -> scrollTarget + ROW_HEIGHT;
                 case InputConstants.KEY_HOME -> 0;
                 case InputConstants.KEY_END -> maxScrollAmount();
                 default -> scrollTarget;
             };
-            return scrollTo(target) || super.keyPressed(event);
+            return scrollTo(target) || super.keyPressed(keyCode, scanCode, modifiers);
         }
 
         @Override
-        public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-            if (recipes != null && event.x() >= craftX && event.x() < right
-                && event.y() >= getY() && event.y() < getBottom() && isValidClickButton(event.buttonInfo())) {
-                int row = ((int) (event.y() - getY()) + (int) Math.round(scrollAmount())) / ROW_HEIGHT;
+        public boolean mouseClicked(double mouseX, double mouseY, int button) {
+            if (recipes != null && mouseX >= craftX && mouseX < right
+                && mouseY >= getY() && mouseY < getBottom() && isValidClickButton(button)) {
+                int row = ((int) (mouseY - getY()) + (int) Math.round(scrollAmount())) / ROW_HEIGHT;
                 if (row < rows.size() && recipes.hasRecipe(rows.get(row).item())) {
                     craft(rows.get(row));
                     return true;
                 }
             }
-            if (!updateScrolling(event)) return false;
+            if (!updateScrolling(mouseX, mouseY, button)) return false;
             scrollTarget = scrollAmount();
             return true;
         }
 
         @Override
-        public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
-            if (!super.mouseDragged(event, deltaX, deltaY)) return false;
+        public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+            if (!super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY)) return false;
             scrollTarget = scrollAmount();
             return true;
         }
@@ -315,7 +313,7 @@ final class StockScreen extends Screen implements IDataReceiver {
                 }
             }
             graphics.disableScissor();
-            renderScrollbar(graphics, mouseX, mouseY);
+            renderScrollbar(graphics);
             if (pointerInList && mouseX >= left && mouseX < right) {
                 int hovered = (mouseY - getY() + offset) / ROW_HEIGHT;
                 if (hovered < rows.size()) {

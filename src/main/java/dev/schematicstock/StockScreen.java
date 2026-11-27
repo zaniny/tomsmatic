@@ -54,18 +54,17 @@ final class StockScreen extends Screen implements IDataReceiver {
         updateRows(rows);
         this.terminal = terminal;
         this.returnToTerminal = returnToTerminal;
-        enableCrafting(terminal);
     }
 
     boolean attachTerminal(AbstractStorageTerminalScreen<?> terminal) {
         if (this.terminal != null) return false;
         this.terminal = terminal;
-        enableCrafting(terminal);
         return true;
     }
 
-    private void enableCrafting(AbstractStorageTerminalScreen<?> terminal) {
-        if (terminal != null && terminal.getMenu() instanceof CraftingTerminalMenu) {
+    private void enableCrafting() {
+        if (recipes == null && terminal != null && terminal.getMenu() instanceof CraftingTerminalMenu
+            && minecraft.player != null && minecraft.level != null) {
             recipes = new CraftingRecipes(minecraft.player.getRecipeBook(), SlotDisplayContext.fromLevel(minecraft.level));
             craftIcon = new ItemStack(Items.CRAFTING_TABLE);
         }
@@ -95,6 +94,7 @@ final class StockScreen extends Screen implements IDataReceiver {
 
     @Override
     protected void init() {
+        enableCrafting();
         double previousScroll = stockList == null ? 0 : stockList.scrollTarget;
         left = Math.max(6, (width - 620) / 2);
         stockList = addRenderableWidget(new StockList(left, width - 2 * left, Math.max(1, height - LIST_TOP - 29)));

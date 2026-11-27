@@ -7,7 +7,6 @@ import com.tom.storagemod.network.NetworkHandler;
 import com.tom.storagemod.network.OpenTerminalPacket;
 import com.tom.storagemod.screen.AbstractStorageTerminalScreen;
 import com.tom.storagemod.util.PlayerInvUtil;
-import com.mojang.blaze3d.platform.InputConstants;
 import dev.schematicstock.refill.RefillClient;
 import fi.dy.masa.litematica.gui.GuiMaterialList;
 import fi.dy.masa.litematica.materials.MaterialListBase;
@@ -29,8 +28,7 @@ import net.minecraft.network.chat.Component;
 public final class SchematicStock implements ClientModInitializer {
     private static final int UNTRACKED_MATERIAL_WAIT_TICKS = 200;
     private static final int STOCK_WAIT_TICKS = 200;
-    static final KeyMapping OPEN_MATERIALS_KEY = new KeyMapping("key.schematic_stock.materials",
-        InputConstants.UNKNOWN.getValue(), KeyMapping.Category.MISC);
+    static final KeyMapping OPEN_MATERIALS_KEY = ClientControls.materialKey();
     private static final StockSelection SELECTION = new StockSelection();
     private static PendingOpen pending;
 

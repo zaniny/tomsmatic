@@ -1,3 +1,5 @@
 /build/
 /ports/1.21.11/.gradle/
 /ports/1.21.11/run/
+/ports/1.21/.gradle/
+/ports/1.21/run/

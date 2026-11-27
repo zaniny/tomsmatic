@@ -5,14 +5,13 @@ import com.tom.storagemod.network.NetworkHandler;
 import com.tom.storagemod.network.OpenTerminalPacket;
 import com.tom.storagemod.screen.AbstractStorageTerminalScreen;
 import com.tom.storagemod.util.TerminalSyncManager.SlotAction;
+import dev.schematicstock.ClientControls;
 import dev.schematicstock.ClientScreens;
 import dev.schematicstock.refill.RefillPackets.Reply;
 import dev.schematicstock.refill.RefillPackets.Request;
 import dev.schematicstock.refill.RefillPackets.Result;
 import fi.dy.masa.litematica.config.Configs;
-import fi.dy.masa.litematica.util.EasyPlaceUtils;
 import fi.dy.masa.litematica.util.EntityUtils;
-import fi.dy.masa.litematica.util.WorldUtils;
 import java.util.Locale;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -154,11 +153,7 @@ public final class RefillClient {
         if (ClientScreens.current(client) == null && request.player.containerMenu == request.player.inventoryMenu) {
             retry = request;
             try {
-                if (Configs.Generic.EASY_PLACE_POST_REWRITE.getBooleanValue()) {
-                    EasyPlaceUtils.handleEasyPlaceWithMessage();
-                } else {
-                    WorldUtils.handleEasyPlace(client);
-                }
+                ClientControls.retryEasyPlace(client);
             } finally {
                 retry = null;
             }
