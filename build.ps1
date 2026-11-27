@@ -11,7 +11,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $modMetadata = Get-Content -Raw -LiteralPath (Join-Path $PSScriptRoot 'src/main/resources/fabric.mod.json') | ConvertFrom-Json
-$jarName = "tomsmatic-$($modMetadata.version).jar"
+$jarName = "tomsmatic-$($modMetadata.version)-$($modMetadata.depends.minecraft).jar"
 $javac = if ($Jdk) {
     Join-Path $Jdk 'bin/javac.exe'
 } else {
@@ -80,7 +80,8 @@ try {
     }
 
     $classpath = (@((Join-Path $versionDir "$version.jar"), $loader, $mixin, $ModMenuJar) + $libraries + $mods + $nested) -join ';'
-    $sources = (Get-ChildItem -LiteralPath (Join-Path $PSScriptRoot 'src/main/java') -Recurse -Filter '*.java').FullName
+    $sourceDirs = 'src/main/java', 'src/26.2+/java' | ForEach-Object { Join-Path $PSScriptRoot $_ }
+    $sources = (Get-ChildItem -LiteralPath $sourceDirs -Recurse -Filter '*.java').FullName
     $argsFile = Join-Path $staging 'javac.args'
     $arguments = @('-proc:none', '--release', '25', '-encoding', 'UTF-8', '-classpath', $classpath, '-d', $classes) + $sources
     $arguments | ForEach-Object { '"' + $_.Replace('\', '/') + '"' } | Set-Content -Encoding utf8NoBOM -LiteralPath $argsFile

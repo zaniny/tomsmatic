@@ -6,6 +6,7 @@ import com.tom.storagemod.network.NetworkHandler;
 import com.tom.storagemod.network.OpenTerminalPacket;
 import com.tom.storagemod.screen.AbstractStorageTerminalScreen;
 import com.tom.storagemod.util.TerminalSyncManager.SlotAction;
+import dev.schematicstock.ClientScreens;
 import dev.schematicstock.refill.RefillPackets.Reply;
 import dev.schematicstock.refill.RefillPackets.Request;
 import dev.schematicstock.refill.RefillPackets.Result;
@@ -50,7 +51,7 @@ public final class RefillClient {
     public static boolean handleMissing(Minecraft client, BlockPos pos, ItemStack item) {
         var player = client.player;
         if (!RefillSetting.enabled() || retry != null || player == null || client.level == null
-            || item.isEmpty() || player.isCreative() || player.isSpectator() || client.gui.screen() != null
+            || item.isEmpty() || player.isCreative() || player.isSpectator() || ClientScreens.current(client) != null
             || player.containerMenu != player.inventoryMenu) {
             return false;
         }
@@ -112,7 +113,7 @@ public final class RefillClient {
     }
 
     private static void tickTerminal(Minecraft client, Pending request) {
-        var screen = client.gui.screen();
+        var screen = ClientScreens.current(client);
         if (request.screen == null && screen instanceof AbstractStorageTerminalScreen<?> terminal) {
             request.screen = terminal;
         }
@@ -153,13 +154,13 @@ public final class RefillClient {
 
     private static void finish(Minecraft client, Pending request, Result result) {
         pending = null;
-        if (request.screen != null && client.gui.screen() == request.screen) request.screen.onClose();
+        if (request.screen != null && ClientScreens.current(client) == request.screen) request.screen.onClose();
         if (result == null) return;
         if (result != Result.OK) {
             notify(client, result);
             return;
         }
-        if (client.gui.screen() == null && request.player.containerMenu == request.player.inventoryMenu) {
+        if (ClientScreens.current(client) == null && request.player.containerMenu == request.player.inventoryMenu) {
             retry = request;
             try {
                 if (Configs.Generic.EASY_PLACE_POST_REWRITE.getBooleanValue()) {

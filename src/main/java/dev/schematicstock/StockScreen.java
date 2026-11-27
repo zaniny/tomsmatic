@@ -155,7 +155,7 @@ final class StockScreen extends Screen implements IDataReceiver {
     public void onClose() {
         var active = activeTerminal();
         if (active != null) {
-            if (returnToTerminal) minecraft.gui.setScreen(active);
+            if (returnToTerminal) ClientScreens.open(minecraft, active);
             else active.onClose();
         } else {
             super.onClose();
@@ -185,7 +185,7 @@ final class StockScreen extends Screen implements IDataReceiver {
             craftStatus = label("craft_missing");
             return;
         }
-        minecraft.gui.setScreen(terminal);
+        ClientScreens.open(minecraft, terminal);
         minecraft.gameMode.handlePlaceRecipe(menu.containerId, recipe.id(), false);
     }
 
@@ -202,7 +202,7 @@ final class StockScreen extends Screen implements IDataReceiver {
             lines.add(total);
             lines.add(shortfall);
             graphics.setTooltipForNextFrame(font, lines, item.getTooltipImage(), mouseX, mouseY,
-                item.get(DataComponents.TOOLTIP_STYLE), true);
+                item.get(DataComponents.TOOLTIP_STYLE));
         } else if (mouseX >= craftX && recipes != null && recipes.hasRecipe(row.item())) {
             graphics.setComponentTooltipForNextFrame(font, List.of(total, shortfall, label("craft_fill")), mouseX, mouseY);
         } else {

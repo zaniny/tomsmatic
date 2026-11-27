@@ -43,7 +43,7 @@ public final class SchematicStock implements ClientModInitializer {
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             pollTerminal(client);
             while (OPEN_MATERIALS_KEY.consumeClick()) {
-                if (client.player != null && client.gui.screen() == null) {
+                if (client.player != null && ClientScreens.current(client) == null) {
                     Component error = openStandalone(client);
                     if (error != null) client.player.sendOverlayMessage(error);
                 }
@@ -80,7 +80,7 @@ public final class SchematicStock implements ClientModInitializer {
         if (rows.isEmpty()) {
             return message("empty_list");
         }
-        client.gui.setScreen(new StockScreen(source.getName(), rows, terminal, true));
+        ClientScreens.open(client, new StockScreen(source.getName(), rows, terminal, true));
         return null;
     }
 
@@ -102,7 +102,7 @@ public final class SchematicStock implements ClientModInitializer {
 
     private static void openReport(Minecraft client, MaterialListBase source, StockScreen report, boolean waiting) {
         report.setMaterialsLoading(waiting);
-        client.gui.setScreen(report);
+        ClientScreens.open(client, report);
         if (waiting) {
             pending = new PendingOpen(client.level, source, report, true);
         } else {
@@ -140,17 +140,17 @@ public final class SchematicStock implements ClientModInitializer {
         var request = pending;
         if (request == null || request.waitingForMaterials || previousScreen != request.report
             || client.level != request.level || client.player == null
-            || !(client.gui.screen() instanceof AbstractStorageTerminalScreen<?> terminal)
+            || !(ClientScreens.current(client) instanceof AbstractStorageTerminalScreen<?> terminal)
             || terminal.getMenu() != client.player.containerMenu) return;
 
-        if (request.report.attachTerminal(terminal)) client.gui.setScreen(request.report);
+        if (request.report.attachTerminal(terminal)) ClientScreens.open(client, request.report);
     }
 
     private static void pollTerminal(Minecraft client) {
         var request = pending;
         if (request == null) return;
         if (client.level != request.level || client.player == null
-            || client.gui.screen() != request.report) {
+            || ClientScreens.current(client) != request.report) {
             pending = null;
             return;
         }

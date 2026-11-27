@@ -1,0 +1,66 @@
+{
+  "26.1": {
+    "mc-version.json": {
+      "url": "https://piston-meta.mojang.com/v1/packages/63f0ca27cbe8a855cc1f59aaee6e283d5c0ee58b/26.1.json",
+      "sha256": "bd3c2b9fa46720cd141718c6c7755763c847aa4c5990b0fb6b6ce55d65dc741a"
+    },
+    "fabric.jar": {
+      "url": "https://cdn.modrinth.com/data/P7dR8mSH/versions/3dM0X6ou/fabric-api-0.155.3%2B26.1.2.jar",
+      "sha256": "7fe7bea3dbb7b2e9ff998ab583130cd62fab22ab8a5229656ff14b2e648c91dd"
+    },
+    "litematica.jar": {
+      "url": "https://cdn.modrinth.com/data/bEpr0Arc/versions/w8P6TokG/litematica-fabric-26.1.2-0.27.14.jar",
+      "sha256": "6e2b224ce9e4778660b4e8f2a392fd2caa93302258551851624c52c43d9d836d"
+    },
+    "malilib.jar": {
+      "url": "https://cdn.modrinth.com/data/GcWjdA9I/versions/FItuNokS/malilib-fabric-26.1.2-0.28.12.jar",
+      "sha256": "0d4b1de602358bc7dfb8a520aa10f89b3ea6daa8b99c1151979a4e845520b211"
+    },
+    "modmenu.jar": {
+      "url": "https://cdn.modrinth.com/data/mOgUt4GM/versions/ZJ6YTrMY/modmenu-18.0.2.jar",
+      "sha256": "87ab58f8907dad8346ecc4500a522d66dd4c907462df5bff23c60b07caca8c96"
+    },
+    "tom.jar": {
+      "url": "https://cdn.modrinth.com/data/XZNI4Cpy/versions/9VRUBvKA/toms_storage_fabric-26.1-2.10.3.jar",
+      "sha256": "ef6939272bf42dc29285821c08a049eeb1f612002cc0bce42149cb063a2712ed"
+    }
+  },
+  "26.1.1": {
+    "mc-version.json": {
+      "url": "https://piston-meta.mojang.com/v1/packages/f8b579c24484f60ea1f5fc30d8174924e300ecfb/26.1.1.json",
+      "sha256": "694560a42257583104b6aa225d717b2da1342a2190e066388d69f1a6bc3e824d"
+    }
+  },
+  "26.1.2": {
+    "mc-version.json": {
+      "url": "https://piston-meta.mojang.com/v1/packages/c193c4e77f6ad181f30f2615544dcf8c7c5093f2/26.1.2.json",
+      "sha256": "ccd4be6535ade0f59e22042b9f67d97ffeca6f7250e4708ed0b0e3ab4d6d8417"
+    }
+  },
+  "26.2": {
+    "mc-version.json": {
+      "url": "https://piston-meta.mojang.com/v1/packages/e1727c77c55b6a2eba6017591e866a02f3f5cb8d/26.2.json",
+      "sha256": "e726aa2a11c9fbe912c529ad33347611d562b356e4bf5f3061d7036127adae95"
+    },
+    "fabric.jar": {
+      "url": "https://cdn.modrinth.com/data/P7dR8mSH/versions/ewUK83HI/fabric-api-0.161.0%2B26.2.jar",
+      "sha256": "e5b858ceb13290c274e31cb888ff5a1a40cb91067e7ffab0b5b775aec51e216a"
+    },
+    "litematica.jar": {
+      "url": "https://cdn.modrinth.com/data/bEpr0Arc/versions/CuniXtbo/litematica-fabric-26.2-0.28.8.jar",
+      "sha256": "6de0774f78aee1698154dc7e7fa3c3afb19201e3d9474ddaf073fa4f4309a064"
+    },
+    "malilib.jar": {
+      "url": "https://cdn.modrinth.com/data/GcWjdA9I/versions/KvjmGjAV/malilib-fabric-26.2-0.29.6.jar",
+      "sha256": "db49040123d8dfe725a95407b4e777383e7162656045bff38ff72fc570080600"
+    },
+    "modmenu.jar": {
+      "url": "https://cdn.modrinth.com/data/mOgUt4GM/versions/iRo7AZXf/modmenu-20.0.3.jar",
+      "sha256": "00865605007fbf26d4712b40ccdd55b1cdebad79a9ccfcc1ff635ed522f5bb27"
+    },
+    "tom.jar": {
+      "url": "https://cdn.modrinth.com/data/XZNI4Cpy/versions/cwif4LaZ/toms_storage_fabric-26.2-2.11.4.jar",
+      "sha256": "365bb899ed004877ec9062a60cdae86ed4aefc8eb22c5e201ed9a1f0f1a59c06"
+    }
+  }
+}

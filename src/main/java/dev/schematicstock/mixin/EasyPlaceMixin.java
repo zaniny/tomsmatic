@@ -19,7 +19,7 @@ abstract class EasyPlaceMixin {
         "Lfi/dy/masa/litematica/util/InventoryUtils;schematicWorldPickBlock(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/Level;Lnet/minecraft/client/Minecraft;)V"),
         cancellable = true)
     private static void tomsmatic$validateRetry(Minecraft client, CallbackInfoReturnable<InteractionResult> result,
-                                               @Local(index = 6) BlockPos pos, @Local(index = 10) ItemStack item) {
+                                               @Local(name = "pos") BlockPos pos, @Local(name = "stack") ItemStack item) {
         if (RefillClient.rejectRetryTarget(pos, item)) result.setReturnValue(InteractionResult.CONSUME);
     }
 
@@ -27,7 +27,7 @@ abstract class EasyPlaceMixin {
         "Lfi/dy/masa/litematica/util/EntityUtils;getUsedHandForItem(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/item/ItemStack;)Lnet/minecraft/world/InteractionHand;"),
         cancellable = true)
     private static void tomsmatic$requestMaterial(Minecraft client, CallbackInfoReturnable<InteractionResult> result,
-                                                @Local(index = 6) BlockPos pos, @Local(index = 10) ItemStack item) {
+                                                @Local(name = "pos") BlockPos pos, @Local(name = "stack") ItemStack item) {
         if (RefillClient.handleMissing(client, pos, item)) result.setReturnValue(InteractionResult.CONSUME);
     }
 }

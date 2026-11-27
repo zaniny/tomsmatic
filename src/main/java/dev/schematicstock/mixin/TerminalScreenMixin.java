@@ -71,7 +71,8 @@ abstract class TerminalScreenMixin extends TSContainerScreen<AbstractContainerMe
         }
     }
 
-    @Inject(method = "mouseReleased", at = @At("HEAD"), cancellable = true)
+    // Tom's Storage 2.12 declares a release handler. Earlier versions inherit it.
+    @Inject(method = "mouseReleased", at = @At("HEAD"), cancellable = true, require = 0)
     private void tomsmatic$handleCompareRelease(MouseButtonEvent event, CallbackInfoReturnable<Boolean> callback) {
         if (tomsmatic$consumeRelease && tomsmatic$button.isPrimaryClick(event)) {
             tomsmatic$consumeRelease = false;

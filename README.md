@@ -6,20 +6,17 @@
 
 Tomsmatic compares the materials in a Litematica schematic with the items in your Tom’s Simple Storage network. One report shows how much you need, what you’ve already placed, what’s in stock, and what you’re still missing. Open it from the terminal or with a hotkey. When building with Easy Place, you can also enable automatic restocking from your storage network.
 
-For **Minecraft Java 26.3** and **Fabric**. [Changelog](CHANGELOG.md) · [Modrinth description](MODRINTH.md)
+For **Minecraft Java 26.1–26.3** and **Fabric**. [Changelog](CHANGELOG.md) · [Modrinth description](MODRINTH.md)
 
 ## Installation
 
-Copy `build/tomsmatic-0.3.12.jar` into your profile’s `mods` folder. When updating, remove the previous Tomsmatic JAR from `mods` and restart the client. This build uses the following versions.
+Copy the JAR matching your exact Minecraft version into the profile’s `mods` folder. When updating, remove the previous Tomsmatic JAR and restart the client. All builds use Java 25 and Fabric Loader 0.19.5 or later.
 
-| Component | Version |
-| --- | --- |
-| Minecraft Java Edition | 26.3 |
-| Fabric Loader | 0.19.5 |
-| Fabric API | 0.162.0 or later for Minecraft 26.3 |
-| Litematica | 0.29.1 |
-| MaLiLib | 0.30.2 |
-| Tom’s Simple Storage | 2.12.1 |
+| Minecraft Java Edition | Fabric API (minimum) | Tom’s Simple Storage | Litematica | MaLiLib |
+| --- | --- | --- | --- | --- |
+| 26.1, 26.1.1, 26.1.2 | 0.155.3 | 2.10.3 | 0.27.14 | 0.28.12 |
+| 26.2 | 0.161.0 | 2.11.4 | 0.28.8 | 0.29.6 |
+| 26.3 | 0.162.0 | 2.12.1 | 0.29.1 | 0.30.2 |
 
 Material checks and client-side auto-refill work on a server running Tom’s Simple Storage and its dependencies. For seamless auto-refill, install the same Tomsmatic JAR on the server and restart it. Litematica and MaLiLib are required on the client.
 
@@ -51,7 +48,7 @@ If the server supports seamless auto-refill, the item goes directly into your in
 
 ## Building from source
 
-To build without an installed game profile, run `python scripts/build.py` with Python 3.11+ and JDK 25. The JAR and its checksum go into `build/release`. See [RELEASING.md](RELEASING.md) for GitHub Actions setup and publishing instructions.
+To build without an installed game profile, run `python scripts/build.py --minecraft 26.1.2` (or select any supported version) with Python 3.11+ and JDK 25. The JAR and its checksum go into `build/release`. See [RELEASING.md](RELEASING.md) for GitHub Actions setup and publishing instructions.
 
 The PowerShell build uses local files from your Modrinth profile and JDK 25. Run the following command from the project folder in PowerShell 7.
 
@@ -59,4 +56,4 @@ The PowerShell build uses local files from your Modrinth profile and JDK 25. Run
 .\build.ps1 -Jdk 'C:\Program Files\JetBrains\JetBrains Rider 2026.1.2\jbr'
 ```
 
-Use `-Profile` to select another profile or `-Modrinth` to point to another Modrinth App folder. To compile the settings integration, the script uses Mod Menu from the profile or the file supplied through `-ModMenuJar`. If `JAVA_HOME` points to JDK 25 and the profile contains Mod Menu, you can run `./build.ps1` without arguments. The output is `build/tomsmatic-0.3.12.jar`.
+Use `-Profile` to select another profile or `-Modrinth` to point to another Modrinth App folder. To compile the settings integration, the script uses Mod Menu from the profile or the file supplied through `-ModMenuJar`. If `JAVA_HOME` points to JDK 25 and the profile contains Mod Menu, you can run `./build.ps1` without arguments. This PowerShell script builds for 26.3 and produces `build/tomsmatic-0.3.13-26.3.jar`.

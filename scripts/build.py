@@ -14,6 +14,11 @@ import zipfile
 ROOT = Path(__file__).resolve().parents[1]
 RESOURCES = ROOT / "src/main/resources"
 LANGUAGES = RESOURCES / "assets/schematic_stock/lang"
+OLDER_TARGETS = {
+    "26.1": ("0.155.3", "2.10.3", "0.27.14", "0.28.12"),
+    "26.2": ("0.161.0", "2.11.4", "0.28.8", "0.29.6"),
+}
+MINECRAFT_VERSIONS = ("26.1", "26.1.1", "26.1.2", "26.2", "26.3")
 
 
 def read_json(path):
@@ -51,13 +56,18 @@ def download(target, url, checksum, algorithm):
 
 def dependencies(cache, minecraft_version):
     locked = read_json(ROOT / "scripts/dependencies.json")
+    if minecraft_version != "26.3":
+        older = read_json(ROOT / "scripts/legacy-dependencies.json")
+        if minecraft_version.startswith("26.1"):
+            locked.update(older["26.1"])
+        locked.update(older[minecraft_version])
     files = {
         name: download(cache / name, spec["url"], spec["sha256"], "sha256")
         for name, spec in locked.items()
     }
     minecraft = read_json(files.pop("mc-version.json"))
     if minecraft["id"] != minecraft_version:
-        raise ValueError("Minecraft version in fabric.mod.json differs from the dependency lock")
+        raise ValueError("Requested Minecraft version differs from the dependency lock")
     client = minecraft["downloads"]["client"]
     yield download(cache / "game.jar", client["url"], client["sha1"], "sha1")
     yield from files.values()
@@ -104,7 +114,9 @@ def pack(classes, output, metadata):
             if file.is_file():
                 info = zipfile.ZipInfo(file.relative_to(source).as_posix())
                 info.external_attr = 0o644 << 16
-                output.writestr(info, file.read_bytes(), compress_type=zipfile.ZIP_DEFLATED)
+                content = (json.dumps(metadata, indent=2).encode("utf-8") + b"\n"
+                           if file == RESOURCES / "fabric.mod.json" else file.read_bytes())
+                output.writestr(info, content, compress_type=zipfile.ZIP_DEFLATED)
     license_file = ROOT / "LICENSE"
     if license_file.is_file():
         info = zipfile.ZipInfo("LICENSE")
@@ -126,8 +138,16 @@ def main():
     parser.add_argument("--cache", type=Path, default=ROOT / "build/ci-cache")
     parser.add_argument("--output", type=Path, default=ROOT / "build/release")
     parser.add_argument("--tag", help="Check that the release tag is v<mod version>")
+    parser.add_argument("--minecraft", choices=MINECRAFT_VERSIONS,
+                        default="26.3", help="Minecraft version to compile against")
     args = parser.parse_args()
     metadata = read_json(RESOURCES / "fabric.mod.json")
+    if args.minecraft != metadata["depends"]["minecraft"]:
+        series = ".".join(args.minecraft.split(".")[:2])
+        fabric, tom, litematica, malilib = OLDER_TARGETS[series]
+        metadata["depends"].update(minecraft=args.minecraft, toms_storage=tom)
+        metadata["depends"]["fabric-api"] = f">={fabric}"
+        metadata["suggests"].update(litematica=litematica, malilib=malilib)
     version = metadata["version"]
     if not re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", version):
         parser.error("fabric.mod.json must contain a version of the form X.Y.Z")
@@ -136,16 +156,22 @@ def main():
     notes = release_notes(version) if args.tag else None
 
     args.output.mkdir(parents=True, exist_ok=True)
-    artifact = args.output / f"tomsmatic-{version}.jar"
+    artifact = args.output / f"tomsmatic-{version}-{args.minecraft}.jar"
     javac = str(Path(os.environ["JAVA_HOME"]) / "bin/javac") if "JAVA_HOME" in os.environ else "javac"
+    screen_api = "26.1" if args.minecraft.split(".")[:2] == ["26", "1"] else "26.2+"
     sources = sorted((ROOT / "src/main/java").rglob("*.java"))
+    sources.extend(sorted((ROOT / "src" / screen_api / "java").rglob("*.java")))
     with tempfile.TemporaryDirectory(dir=args.output) as directory:
         staging = Path(directory)
         classes = staging / "classes"
         classes.mkdir()
-        classpath = os.pathsep.join(str(path) for path in dependencies(args.cache, metadata["depends"]["minecraft"]))
-        subprocess.run([javac, "-proc:none", "--release", "25", "-encoding", "UTF-8",
-                        "-classpath", classpath, "-d", str(classes), *map(str, sources)], check=True)
+        classpath = os.pathsep.join(str(path) for path in dependencies(args.cache / args.minecraft, args.minecraft))
+        arguments = ["-proc:none", "--release", "25", "-encoding", "UTF-8",
+                     "-classpath", classpath, "-d", str(classes), *map(str, sources)]
+        argfile = staging / "javac.args"
+        argfile.write_text("\n".join('"' + arg.replace("\\", "/") + '"' for arg in arguments),
+                           encoding="utf-8")
+        subprocess.run([javac, f"@{argfile}"], check=True)
         jar = staging / artifact.name
         with zipfile.ZipFile(jar, "w") as output:
             pack(classes, output, metadata)
@@ -155,7 +181,7 @@ def main():
         jar.replace(artifact)
     artifact.with_suffix(".jar.sha256").write_text(f"{digest(artifact, 'sha256')}  {artifact.name}\n", encoding="utf-8")
     if notes:
-        artifact.with_suffix(".md").write_text(notes, encoding="utf-8")
+        (args.output / f"tomsmatic-{version}.md").write_text(notes, encoding="utf-8")
     print(artifact)
 
 

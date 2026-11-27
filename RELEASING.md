@@ -41,18 +41,18 @@ git push -u origin main
 
 ## 3. Собрать GitHub Release
 
-В примере выпускается текущая версия `0.3.12`. У следующих релизов обновляй версию в `src/main/resources/fabric.mod.json` перед созданием тега. Используй новый тег для каждого выпуска.
+В примере выпускается текущая версия `0.3.13`. У следующих релизов обновляй версию в `src/main/resources/fabric.mod.json` перед созданием тега. Используй новый тег для каждого выпуска.
 
 ```powershell
 git switch main
 git pull --ff-only
-git tag -a v0.3.12 -m "Tomsmatic 0.3.12"
-git push origin v0.3.12
+git tag -a v0.3.13 -m "Tomsmatic 0.3.13"
+git push origin v0.3.13
 ```
 
-После успешной сборки в **Releases** появится черновик с `tomsmatic-0.3.12.jar` и файлом SHA-256. Примечания берутся из раздела `## 0.3.12` в [CHANGELOG.md](CHANGELOG.md). Для нового тега добавь одноимённый раздел в журнал до отправки тега. Проверь JAR в отдельном профиле Fabric, затем нажми **Publish release**.
+После успешной сборки в **Releases** появится черновик с отдельным `tomsmatic-0.3.13-<версия Minecraft>.jar` и файлом SHA-256 для каждой версии Minecraft. Примечания берутся из раздела `## 0.3.13` в [CHANGELOG.md](CHANGELOG.md). Для нового тега добавь одноимённый раздел в журнал до отправки тега. Проверь JAR в отдельном профиле Fabric, затем нажми **Publish release**.
 
-Чтобы запустить ту же сборку локально, поставь Python 3.11 или новее и JDK 25, затем запусти `python scripts/build.py`. Файлы появятся в `build/release`. Сборка из установленного профиля Modrinth App через `build.ps1` тоже доступна.
+Чтобы запустить ту же сборку локально, поставь Python 3.11 или новее и JDK 25, затем запусти `python scripts/build.py --minecraft 26.1.2`, подставив нужную версию. Файлы появятся в `build/release`. Сборка из установленного профиля Modrinth App через `build.ps1` доступна для 26.3.
 
 [Официальная документация по релизам GitHub](https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository)
 
@@ -60,7 +60,7 @@ git push origin v0.3.12
 
 1. Войди в Modrinth и создай проект типа **Mod** с названием **Tomsmatic**. Для короткого описания подойдёт `Compare Litematica materials with Tom’s Simple Storage and optionally refill Easy Place.` Для полного описания используй [MODRINTH.md](MODRINTH.md).
 2. Добавь ссылку на исходники GitHub и лицензию. Для страницы Modrinth используй свою иконку, сделанную вручную. Иконка в JAR и README сгенерирована, а текст страницы подготовлен с помощью ИИ. Укажи это в раскрытии использования ИИ на Modrinth и проверь применимость [правил публикации](https://modrinth.com/legal/rules/) к проекту.
-3. Создай первую версию вручную. Прикрепи JAR из GitHub Release, выбери **Minecraft 26.3**, загрузчик **Fabric** и канал **Release**. Добавь **Fabric API** и **Tom’s Simple Storage** как обязательные зависимости. Укажи **Litematica**, **MaLiLib** и **Mod Menu** в связанных зависимостях. В универсальном JAR они опциональны для сервера. На клиенте для самой сверки требуются Litematica и MaLiLib.
+3. Создай первую версию вручную. Прикрепи JAR из GitHub Release, выбери точную версию **Minecraft** по имени JAR, загрузчик **Fabric** и канал **Release**. Добавь **Fabric API** и **Tom’s Simple Storage** как обязательные зависимости. Укажи **Litematica**, **MaLiLib** и **Mod Menu** в связанных зависимостях. В универсальном JAR они опциональны для сервера. На клиенте для самой сверки требуются Litematica и MaLiLib.
 4. Открой страницу проекта, проверь карточку версии и отправь проект на модерацию, когда интерфейс предложит **Submit for review**.
 
 [Правила публикации Modrinth](https://modrinth.com/legal/rules/)
@@ -69,8 +69,8 @@ git push origin v0.3.12
 
 1. Возьми восьмисимвольный ID проекта Modrinth. Если у тебя только slug из публичного URL, поле `id` видно в JSON по адресу `https://api.modrinth.com/v2/project/ТВОЙ-SLUG`.
 2. В [настройках токенов Modrinth](https://modrinth.com/settings/pats) создай PAT с правом `VERSION_CREATE`. В GitHub открой **Settings → Secrets and variables → Actions**. Сохрани токен как **secret** `MODRINTH_TOKEN`, а ID проекта как **variable** `MODRINTH_PROJECT_ID`. Токен вводится только в поле секрета.
-3. После публикации следующего GitHub Release открой **Actions → Publish to Modrinth → Run workflow**, оставь ветку `main` и введи тег релиза. Сценарий проверит контрольную сумму и версию JAR, затем загрузит файл с примечаниями из GitHub Release. Вкладка **Versions** на Modrinth покажет опубликованную версию.
-4. Если версия уже добавлена вручную, пропусти ручной запуск для этого тега. При сбое во время загрузки проверь **Versions** перед повтором.
+3. После публикации следующего GitHub Release открой **Actions → Publish to Modrinth → Run workflow**, оставь ветку `main` и введи тег релиза. Сценарий проверит контрольную сумму и метаданные каждого JAR, затем опубликует отдельную сборку на каждую версию Minecraft. Вкладка **Versions** на Modrinth покажет опубликованную версию.
+4. Для вручную опубликованных сборок используй номер вида `0.3.13+26.1.2`, чтобы автоматизация могла пропустить их при запуске и при повторной попытке.
 
 [GitHub Actions secrets](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets)
 [Modrinth API для публикации версии](https://docs.modrinth.com/api/operations/createversion/)

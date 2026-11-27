@@ -102,7 +102,7 @@ public final class TomsmaticModMenu implements ModMenuApi {
 
         @Override
         public void onClose() {
-            minecraft.gui.setScreen(parent);
+            ClientScreens.open(minecraft, parent);
         }
 
         private static Component refillLabel() {

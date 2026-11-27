@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: Published GitHub release tag, e.g. v0.3.12
+        description: Published GitHub release tag, e.g. v0.3.13
         required: true
         type: string
 
@@ -19,6 +19,17 @@ jobs:
   publish:
     if: github.ref_name == github.event.repository.default_branch
     runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {minecraft: "26.1", tom: "9VRUBvKA", litematica: "w8P6TokG", malilib: "FItuNokS"}
+          - {minecraft: "26.1.1", tom: "9VRUBvKA", litematica: "w8P6TokG", malilib: "FItuNokS"}
+          - {minecraft: "26.1.2", tom: "9VRUBvKA", litematica: "w8P6TokG", malilib: "FItuNokS"}
+          - {minecraft: "26.2", tom: "cwif4LaZ", litematica: "CuniXtbo", malilib: "KvjmGjAV"}
+          - {minecraft: "26.3", tom: "znUwcb7Z", litematica: "ZqV316KY", malilib: "JX9bESec"}
+    env:
+      MINECRAFT_VERSION: ${{ matrix.minecraft }}
     steps:
       - name: Download and verify the published JAR
         env:
@@ -27,7 +38,7 @@ jobs:
         run: |
           [[ "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]
           version="${RELEASE_TAG#v}"
-          file="tomsmatic-$version.jar"
+          file="tomsmatic-$version-$MINECRAFT_VERSION.jar"
           gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json isDraft,isPrerelease,body > release.json
           jq -e '.isDraft == false and .isPrerelease == false' release.json > /dev/null
           gh release download "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --pattern "$file" --pattern "$file.sha256"
@@ -35,33 +46,42 @@ jobs:
           [[ "$expected" =~ ^[a-f0-9]{64}$ ]]
           printf '%s  %s\n' "$expected" "$file" | sha256sum --check -
           unzip -p "$file" fabric.mod.json > fabric.mod.json
-          jq -e --arg version "$version" '.id == "schematic_stock" and .version == $version' fabric.mod.json > /dev/null
+          jq -e --arg version "$version" --arg minecraft "$MINECRAFT_VERSION" \
+            '.id == "schematic_stock" and .version == $version and .depends.minecraft == $minecraft' fabric.mod.json > /dev/null
       - name: Upload the verified release to Modrinth
         env:
           RELEASE_TAG: ${{ inputs.tag }}
           MODRINTH_PROJECT_ID: ${{ vars.MODRINTH_PROJECT_ID }}
           MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+          TOM_VERSION: ${{ matrix.tom }}
+          LITEMATICA_VERSION: ${{ matrix.litematica }}
+          MALILIB_VERSION: ${{ matrix.malilib }}
         run: |
           : "${MODRINTH_TOKEN:?Set the MODRINTH_TOKEN Actions secret}"
           [[ "$MODRINTH_PROJECT_ID" =~ ^[A-Za-z0-9]{8}$ ]]
           version="${RELEASE_TAG#v}"
+          modrinth_version="$version+$MINECRAFT_VERSION"
           api="https://api.modrinth.com/v2"
           agent="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY (Tomsmatic release workflow)"
           curl --fail --silent --show-error --user-agent "$agent" \
             "$api/project/$MODRINTH_PROJECT_ID/version" > versions.json
-          if jq -e --arg v "$version" 'any(.[]; .version_number == $v)' versions.json > /dev/null; then
-            echo "Version $version already exists on Modrinth."
-            exit 1
+          if jq -e --arg v "$modrinth_version" 'any(.[]; .version_number == $v)' versions.json > /dev/null; then
+            echo "Version $modrinth_version already exists on Modrinth."
+            exit 0
           fi
-          jq --arg project "$MODRINTH_PROJECT_ID" --arg version "$version" --slurpfile release release.json '
+          jq --arg project "$MODRINTH_PROJECT_ID" --arg version "$modrinth_version" \
+            --arg tom "$TOM_VERSION" --arg litematica "$LITEMATICA_VERSION" --arg malilib "$MALILIB_VERSION" \
+            --slurpfile release release.json '
             def dep($id; $kind): {project_id:$id, dependency_type:$kind};
+            def pinned($id; $v; $kind): dep($id; $kind) + {version_id:$v};
             {project_id:$project, name:("Tomsmatic " + $version), version_number:$version,
              changelog:($release[0].body // ""), game_versions:[.depends.minecraft], loaders:["fabric"],
              version_type:"release", status:"listed", featured:false, file_parts:["jar"], primary_file:"jar",
-             dependencies:[dep("P7dR8mSH";"required"), dep("XZNI4Cpy";"required"),
-                           dep("bEpr0Arc";"optional"), dep("GcWjdA9I";"optional"), dep("mOgUt4GM";"optional")]}
+             dependencies:[dep("P7dR8mSH";"required"), pinned("XZNI4Cpy";$tom;"required"),
+                           pinned("bEpr0Arc";$litematica;"optional"), pinned("GcWjdA9I";$malilib;"optional"),
+                           dep("mOgUt4GM";"optional")]}
           ' fabric.mod.json > modrinth-version.json
           curl --fail-with-body --silent --show-error --user-agent "$agent" \
             --header "Authorization: $MODRINTH_TOKEN" \
             --form "data=<modrinth-version.json;type=application/json" \
-            --form "jar=@tomsmatic-$version.jar;type=application/java-archive" "$api/version"
+            --form "jar=@tomsmatic-$version-$MINECRAFT_VERSION.jar;type=application/java-archive" "$api/version"
